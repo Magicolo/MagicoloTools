@@ -1,0 +1,14 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Magicolo\GeneralTools\StateMachine\Editor\StateMachineGeneratorWindow.cs">
+    <Files>
+      <File FileName="Assets\Magicolo\GeneralTools\Extensions\AudioClipExtensions.cs" Line="82" Column="1" />
+      <File FileName="Assets\Magicolo\GeneralTools\StateMachine\Editor\StateMachineGeneratorWindow.cs" Line="243" Column="1" />
+      <File FileName="Assets\Magicolo\GeneralTools\StateMachine\Editor\StateMachineEditor.cs" Line="538" Column="5" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
