@@ -5,7 +5,7 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{DC068CE2-A1A4-566F-A155-C010D2F8914D}</ProjectGuid>
+	<ProjectGuid>{3581A99C-59E9-3D7A-FE33-C8839A045BC3}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
@@ -46,36 +46,38 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Magicolo\AudioTools\PureData\Editor\PureDataCustomMenu.cs" />
-     <Compile Include="Assets\Magicolo\AudioTools\PureData\Editor\PureDataEditor.cs" />
-     <Compile Include="Assets\Magicolo\AudioTools\PureData\Editor\PureDataSetupEditor.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\AttributeUtility.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\ButtonDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\ClampDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\CustomAttributePropertyDrawerBase.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\DisableDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\MaxDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\MinDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\MinMaxSliderDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\PopupDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\PropertyFieldDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\SeparatorDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\ShowPropertiesDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\CustomAttributes\Editor\SingleLineVectorDrawer.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\Editor\CustomEditorBase.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\Editor\CustomEditorStyles.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\Editor\CustomPropertyDrawerBase.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\Editor\CustomWindowBase.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\Editor\SnapSettings.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\Editor\SymbolsWindow.cs" />
-     <Compile Include="Assets\Magicolo\EditorTools\Editor\TransformEditor.cs" />
-     <Compile Include="Assets\Magicolo\GeneralTools\ComboSystem\Editor\ComboSystemEditor.cs" />
-     <Compile Include="Assets\Magicolo\GeneralTools\Spawner\Editor\SpawnerCustomMenus.cs" />
-     <Compile Include="Assets\Magicolo\GeneralTools\Spawner\Editor\SpawnerEditor.cs" />
-     <Compile Include="Assets\Magicolo\GeneralTools\StateMachine\Editor\StateMachineEditor.cs" />
-     <Compile Include="Assets\Magicolo\GeneralTools\StateMachine\Editor\StateMachineGeneratorWindow.cs" />
-     <Compile Include="Assets\Magicolo\GraphicsTools\Model\Editor\ModelPhysicsOptionsDrawer.cs" />
-     <Compile Include="Assets\Magicolo\GraphicsTools\Model\Editor\ModelRenderOptionsDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\AudioTools\PureData\Editor\PureDataCustomMenu.cs" />
+     <Compile Include="Assets\Magicolo\Tools\AudioTools\PureData\Editor\PureDataEditor.cs" />
+     <Compile Include="Assets\Magicolo\Tools\AudioTools\PureData\Editor\PureDataSetupEditor.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\AttributeUtility.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\ButtonDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\ClampDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\CustomAttributePropertyDrawerBase.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\DisableDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\MaxDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\MinDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\MinMaxSliderDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\PopupDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\PropertyFieldDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\SeparatorDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\ShowPropertiesDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\SingleLineVectorDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\SliderDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomEditorBase.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomEditorStyles.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomPropertyDrawerBase.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomWindowBase.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\SnapSettings.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\SymbolsWindow.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\TransformEditor.cs" />
+     <Compile Include="Assets\Magicolo\Tools\GeneralTools\ComboSystem\Editor\ComboSystemEditor.cs" />
+     <Compile Include="Assets\Magicolo\Tools\GeneralTools\Spawner\Editor\SpawnerCustomMenus.cs" />
+     <Compile Include="Assets\Magicolo\Tools\GeneralTools\Spawner\Editor\SpawnerEditor.cs" />
+     <Compile Include="Assets\Magicolo\Tools\GeneralTools\StateMachine\Editor\StateMachineEditor.cs" />
+     <Compile Include="Assets\Magicolo\Tools\GeneralTools\StateMachine\Editor\StateMachineGeneratorWindow.cs" />
+     <Compile Include="Assets\Magicolo\Tools\GraphicsTools\Model\Editor\ModelPhysicsOptionsDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\GraphicsTools\Model\Editor\ModelRenderOptionsDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\GraphicsTools\RenderReorder\Editor\RenderReorderWindow.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
@@ -109,10 +111,6 @@
  <Reference Include="UnityEditor.OSXStandalone.Extensions">
  <HintPath>C:/Program Files/Unity/Editor/Data/PlaybackEngines/macstandalonesupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
  </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="Assembly-CSharp-vs.csproj">
-      <Project>{E5C00A68-E6DB-FEA3-938C-F34D364EA738}</Project>      <Name>Assembly-CSharp-vs</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
