@@ -21,6 +21,14 @@ namespace Magicolo.GeneralTools {
 			return IdIdentifiableDict[id];
 		}
 		
+		public virtual int[] GetIds() {
+			return IdIdentifiableDict.GetKeyArray();
+		}
+		
+		public virtual T[] GetIdentifiables() {
+			return IdIdentifiableDict.GetValueArray();
+		}
+		
 		public virtual int GetUniqueId() {
 			idCounter += 1;
 			return idCounter;
@@ -29,7 +37,7 @@ namespace Magicolo.GeneralTools {
 		public virtual void SetUniqueId(T identifiable) {
 			idCounter += 1;
 			identifiable.Id = idCounter;
-			IdIdentifiableDict[idCounter] = identifiable;
+			AddIdentifiable(identifiable);
 		}
 		
 		public virtual void SetUniqueIds(IList<T> identifiables) {
@@ -38,13 +46,8 @@ namespace Magicolo.GeneralTools {
 			}
 		}
 		
-		public virtual void ResetUniqueIds(IList<T> identifiables) {
-			RemoveAllIds();
-			SetUniqueIds(identifiables);
-		}
-		
-		public virtual void AddId(int id, T identifiable) {
-			IdIdentifiableDict[id] = identifiable;
+		public virtual void AddIdentifiable(T identifiable) {
+			IdIdentifiableDict[identifiable.Id] = identifiable;
 		}
 		
 		public virtual void RemoveId(int id) {
@@ -56,11 +59,16 @@ namespace Magicolo.GeneralTools {
 			idCounter = 0;
 		}
 		
-		public virtual bool ContainsId(int id){
+		public virtual void ResetUniqueIds(IList<T> identifiables) {
+			RemoveAllIds();
+			SetUniqueIds(identifiables);
+		}
+		
+		public virtual bool ContainsId(int id) {
 			return IdIdentifiableDict.ContainsKey(id);
 		}
 		
-		public virtual bool ContainsIdentifiable(T identifiable){
+		public virtual bool ContainsIdentifiable(T identifiable) {
 			return IdIdentifiableDict.ContainsValue(identifiable);
 		}
 	}

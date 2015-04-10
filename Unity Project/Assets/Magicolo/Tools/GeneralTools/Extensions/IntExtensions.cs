@@ -4,7 +4,7 @@ namespace Magicolo {
 	public static class IntExtensions {
 
 		public static float PowSign(this int i, double power) {
-			return Mathf.Pow(Mathf.Abs(i), (float)power) * (i < 0 ? -1 : 1);
+			return Mathf.Pow(Mathf.Abs(i), (float)power) * i.Sign();
 		}
 	
 		public static float PowSign(this int i) {
@@ -29,6 +29,10 @@ namespace Magicolo {
 	
 		public static int Round(this int i) {
 			return i.Round(1);
+		}
+		
+		public static int Sign(this int i) {
+			return i < 0 ? -1 : 1;
 		}
 	}
 }

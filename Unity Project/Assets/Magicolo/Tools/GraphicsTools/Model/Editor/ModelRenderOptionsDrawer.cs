@@ -115,7 +115,7 @@ namespace Magicolo.GraphicsTools {
 			foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>()) {
 				Material material = renderer.sharedMaterial;
 				
-				if (material != null) {
+				if (material != null && material.name.Contains("Texture")) {
 					if (!materials.Contains(material)) {
 						materials.Add(material);
 					}

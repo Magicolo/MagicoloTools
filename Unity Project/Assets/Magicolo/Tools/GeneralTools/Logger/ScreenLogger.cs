@@ -24,6 +24,7 @@ namespace Magicolo.GeneralTools {
 				if (instance == null && Application.isPlaying) {
 					Initialize();
 				}
+				
 				return instance;
 			}
 		}
@@ -32,7 +33,7 @@ namespace Magicolo.GeneralTools {
 		
 		public static void Initialize() {
 			if (instance == null) {
-				GameObject gameObject = new GameObject("ScreenLogger");
+				GameObject gameObject = new GameObject("Screen Logger");
 				gameObject.transform.Reset();
 				gameObject.hideFlags = HideFlags.HideInHierarchy;
 				instance = gameObject.AddComponent<ScreenLogger>();
@@ -56,6 +57,15 @@ namespace Magicolo.GeneralTools {
 				QueuedLines.Enqueue(new ScreenLoggerLine(line, new Color(Brightness, 0, 0, Alpha)));
 			}
 		}
+		
+		#if UNITY_EDITOR
+		[UnityEditor.Callbacks.DidReloadScripts]
+		static void OnReloadScripts() {
+			if (!Application.isPlaying && Instance != null) {
+				Instance.gameObject.Remove();
+			}
+		}
+		#endif
 		
 		void Update() {
 			for (int i = QueuedLines.Count - 1; i >= 0; i--) {

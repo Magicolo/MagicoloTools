@@ -5,6 +5,16 @@ using System.Collections;
 namespace Magicolo {
 	public static class ListExtensions {
 
+		public static bool RemoveRange<T>(this List<T> list, T[] elements) {
+			bool success = true;
+			
+			foreach (T element in elements) {
+				success &= list.Remove(element);
+			}
+			
+			return success;
+		}
+		
 		public static T Pop<T>(this List<T> list, int index = 0) {
 			if (list == null || list.Count == 0) {
 				return default(T);

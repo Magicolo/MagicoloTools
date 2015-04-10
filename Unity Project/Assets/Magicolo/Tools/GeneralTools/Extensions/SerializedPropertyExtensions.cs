@@ -1,7 +1,5 @@
-﻿#if UNITY_EDITOR
+﻿//#if UNITY_EDITOR
 using System.Collections.Generic;
-using System.Reflection;
-using System.Security.AccessControl;
 using UnityEditor;
 using UnityEngine;
 using System.Collections;
@@ -9,10 +7,6 @@ using System.Collections;
 namespace Magicolo {
 	public static class SerializedPropertyExtensions {
 
-		public static SerializedProperty GetLastArrayElement(this SerializedProperty property) {
-			return property.GetArrayElementAtIndex(property.arraySize - 1);
-		}
-		
 		public static object GetValue(this SerializedProperty property) {
 			switch (property.propertyType) {
 				case SerializedPropertyType.Integer:
@@ -66,14 +60,14 @@ namespace Magicolo {
 		}
 	
 		public static object GetLastValue(this SerializedProperty arrayProperty) {
-			return arrayProperty.GetLastArrayElement().GetValue();
+			return arrayProperty.Last().GetValue();
 		}
 		
 		public static T GetLastValue<T>(this SerializedProperty arrayProperty) {
 			return (T)arrayProperty.GetLastValue();
 		}
 	
-		public static object[] GetValues(this SerializedProperty arrayProperty){
+		public static object[] GetValues(this SerializedProperty arrayProperty) {
 			object[] values = new object[arrayProperty.arraySize];
 			
 			for (int i = 0; i < arrayProperty.arraySize; i++) {
@@ -83,7 +77,7 @@ namespace Magicolo {
 			return values;
 		}
 		
-		public static T[] GetValues<T>(this SerializedProperty arrayProperty){
+		public static T[] GetValues<T>(this SerializedProperty arrayProperty) {
 			T[] values = new T[arrayProperty.arraySize];
 			
 			for (int i = 0; i < arrayProperty.arraySize; i++) {
@@ -156,7 +150,7 @@ namespace Magicolo {
 		}
 		
 		public static void SetLastValue(this SerializedProperty arrayProperty, object value) {
-			arrayProperty.GetLastArrayElement().SetValue(value);
+			arrayProperty.Last().SetValue(value);
 		}
 		
 		public static void SetValues(this SerializedProperty arrayProperty, IList array) {
@@ -169,7 +163,27 @@ namespace Magicolo {
 			arrayProperty.serializedObject.ApplyModifiedProperties();
 		}
 		
-		public static GUIContent ToGUIContent(this SerializedProperty property){
+		public static void SetValueToSelected(this SerializedProperty property) {
+			SetValueToSelected(property, property.GetValue());
+		}
+		
+		public static void SetValueToSelected(this SerializedProperty property, object value) {
+			Object targetObject = property.serializedObject.targetObject;
+			
+			foreach (GameObject gameObject in Selection.gameObjects) {
+				Component selectedObject = gameObject.GetComponent(targetObject.GetType());
+						
+				if (selectedObject == null) {
+					continue;
+				}
+						
+				SerializedObject selectedObjectSerialized = new SerializedObject(selectedObject);
+				selectedObjectSerialized.FindProperty(property.propertyPath).SetValue(value);
+				selectedObjectSerialized.ApplyModifiedProperties();
+			}
+		}
+		
+		public static GUIContent ToGUIContent(this SerializedProperty property) {
 			return new GUIContent(property.displayName, property.tooltip);
 		}
 		
@@ -325,6 +339,14 @@ namespace Magicolo {
 			}
 		}
 	
+		public static SerializedProperty First(this SerializedProperty arrayProperty) {
+			return arrayProperty.GetArrayElementAtIndex(0);
+		}
+		
+		public static SerializedProperty Last(this SerializedProperty arrayProperty) {
+			return arrayProperty.GetArrayElementAtIndex(arrayProperty.arraySize - 1);
+		}
+		
 		public static bool Contains(this SerializedProperty arrayProperty, object value) {
 			for (int i = 0; i < arrayProperty.arraySize; i++) {
 				SerializedProperty elementProperty = arrayProperty.GetArrayElementAtIndex(i);
@@ -361,19 +383,63 @@ namespace Magicolo {
 			return true;
 		}
 	
-		public static void ForEach<T>(this SerializedProperty arrayProperty, System.Action<T> action){
+		public static void ForEach<T>(this SerializedProperty arrayProperty, System.Action<T> action) {
 			for (int i = 0; i < arrayProperty.arraySize; i++) {
 				SerializedProperty elementProperty = arrayProperty.GetArrayElementAtIndex(i);
 				action(elementProperty.GetValue<T>());
 			}
 		}
 		
-		public static void ForEachReversed<T>(this SerializedProperty arrayProperty, System.Action<T> action){
+		public static void ForEachReversed<T>(this SerializedProperty arrayProperty, System.Action<T> action) {
 			for (int i = arrayProperty.arraySize - 1; i >= 0; i--) {
 				SerializedProperty elementProperty = arrayProperty.GetArrayElementAtIndex(i);
 				action(elementProperty.GetValue<T>());
 			}
 		}
+	
+		public static SerializedProperty Add(this SerializedProperty arrayProperty, object element) {
+			SerializedProperty elementProperty;
+			
+			arrayProperty.arraySize += 1;
+			arrayProperty.SetLastValue(element);
+			elementProperty = arrayProperty.Last();
+			arrayProperty.isExpanded = true;
+			elementProperty.isExpanded = true;
+			arrayProperty.serializedObject.ApplyModifiedProperties();
+			EditorUtility.SetDirty(arrayProperty.serializedObject.targetObject);
+			
+			return elementProperty;
+		}
+		
+		public static SerializedProperty Insert(this SerializedProperty arrayProperty, object element, int index) {
+			SerializedProperty elementProperty;
+			
+			elementProperty = arrayProperty.Add(element);
+			arrayProperty.MoveArrayElement(arrayProperty.arraySize - 1, index);
+			
+			return elementProperty;
+		}
+		
+		public static void RemoveAt(this SerializedProperty arrayProperty, int index) {
+			arrayProperty.SetValue(null, index);
+			arrayProperty.DeleteArrayElementAtIndex(index);
+			arrayProperty.serializedObject.ApplyModifiedProperties();
+			EditorUtility.SetDirty(arrayProperty.serializedObject.targetObject);
+		}
+		
+		public static void Remove(this SerializedProperty arrayProperty, object element) {
+			int index = arrayProperty.IndexOf(element);
+			
+			if (index != -1) {
+				arrayProperty.RemoveAt(index);
+			}
+		}
+
+		public static void Clear(this SerializedProperty arrayProperty) {
+			arrayProperty.ClearArray();
+			arrayProperty.serializedObject.ApplyModifiedProperties();
+			EditorUtility.SetDirty(arrayProperty.serializedObject.targetObject);
+		}
 	}
 }
-#endif
+//#endif

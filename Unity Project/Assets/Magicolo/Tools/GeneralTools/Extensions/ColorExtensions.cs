@@ -4,88 +4,88 @@ using System.Collections;
 namespace Magicolo {
 	public static class ColorExtensions {
 
-		public static Color SetValues(this Color color, Color values, string channels) {
-			return ((Vector4)color).SetValues((Vector4)values, HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static Color SetValues(this Color color, Color values, Channels channels) {
+			return ((Vector4)color).SetValues((Vector4)values, (Axis)channels);
 		}
 		
 		public static Color SetValues(this Color color, Color values) {
 			return ((Vector4)color).SetValues((Vector4)values);
 		}
 				
-		public static Color Lerp(this Color color, Color target, float time, string channels) {
-			return ((Vector4)color).Lerp((Vector4)target, time, HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static Color Lerp(this Color color, Color target, float time, Channels channels) {
+			return ((Vector4)color).Lerp((Vector4)target, time, (Axis)channels);
 		}
 			
 		public static Color Lerp(this Color color, Color target, float time) {
 			return ((Vector4)color).Lerp((Vector4)target, time);
 		}
 		
-		public static Color LerpLinear(this Color color, Color target, float time, string channels) {
-			return ((Vector4)color).LerpLinear((Vector4)target, time, HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static Color LerpLinear(this Color color, Color target, float time, Channels channels) {
+			return ((Vector4)color).LerpLinear((Vector4)target, time, (Axis)channels);
 		}
 		
 		public static Color LerpLinear(this Color color, Color target, float time) {
 			return ((Vector4)color).LerpLinear((Vector4)target, time);
 		}
 
-		public static Color Oscillate(this Color color, Color frequency, Color amplitude, Color center, float offset, string channels) {
-			return ((Vector4)color).Oscillate((Vector4)frequency, (Vector4)amplitude, (Vector4)center, offset, HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static Color Oscillate(this Color color, Color frequency, Color amplitude, Color center, float offset, Channels channels) {
+			return ((Vector4)color).Oscillate((Vector4)frequency, (Vector4)amplitude, (Vector4)center, offset, (Axis)channels);
 		}
 		
 		public static Color Oscillate(this Color color, Color frequency, Color amplitude, Color center, float offset) {
-			return ((Vector4)color).Oscillate((Vector4)frequency, (Vector4)amplitude, (Vector4)center, offset);
+			return color.Oscillate(frequency, amplitude, center, offset, Channels.RGBA);
 		}
 		
-		public static Color Oscillate(this Color color, Color frequency, Color amplitude, Color center, string channels) {
-			return color.Oscillate(frequency, amplitude, center, 0, channels);
+		public static Color Oscillate(this Color color, Color frequency, Color amplitude, Color center, Channels channels) {
+			return color.Oscillate(frequency, amplitude, center, 0F, channels);
 		}
 		
 		public static Color Oscillate(this Color color, Color frequency, Color amplitude, Color center) {
-			return color.Oscillate(frequency, amplitude, center, 0);
+			return color.Oscillate(frequency, amplitude, center, 0F, Channels.RGBA);
 		}
 		
-		public static Color Mult(this Color color, Color otherColor, string channels) {
-			return ((Vector4)color).Mult((Vector4)otherColor, HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static Color Mult(this Color color, Color otherColor, Channels channels) {
+			return ((Vector4)color).Mult((Vector4)otherColor, (Axis)channels);
 		}
 	
 		public static Color Mult(this Color color, Color otherColor) {
-			return ((Vector4)color).Mult((Vector4)otherColor);
+			return color.Mult(otherColor, Channels.RGBA);
 		}
 	
-		public static Color Div(this Color color, Color otherColor, string channels) {
-			return ((Vector4)color).Div((Vector4)otherColor, HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static Color Div(this Color color, Color otherColor, Channels channels) {
+			return ((Vector4)color).Div((Vector4)otherColor, (Axis)channels);
 		}
 	
 		public static Color Div(this Color color, Color otherColor) {
-			return ((Vector4)color).Div((Vector4)otherColor);
+			return color.Div(otherColor, Channels.RGBA);
 		}
 	
-		public static Color Pow(this Color color, double power, string channels) {
-			return ((Vector4)color).Pow(power, HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static Color Pow(this Color color, double power, Channels channels) {
+			return ((Vector4)color).Pow(power, (Axis)channels);
 		}
 	
 		public static Color Pow(this Color color, double power) {
-			return ((Vector4)color).Pow(power);
+			return color.Pow(power, Channels.RGBA);
 		}
 	
-		public static Color Round(this Color color, double step, string channels) {
-			return ((Vector4)color).Round(step, HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static Color Round(this Color color, double step, Channels channels) {
+			return ((Vector4)color).Round(step, (Axis)channels);
 		}
 	
 		public static Color Round(this Color color, double step) {
-			return ((Vector4)color).Round(step);
+			return color.Round(step, Channels.RGBA);
 		}
 	
 		public static Color Round(this Color color) {
 			return color.Round(1);
 		}
 	
-		public static float Average(this Color color, string channels) {
-			return ((Vector4)color).Average(HelperFunctions.ColorChannelsToVectorAxis(channels));
+		public static float Average(this Color color, Channels channels) {
+			return ((Vector4)color).Average((Axis)channels);
 		}
 	
 		public static float Average(this Color color) {
-			return ((Vector4)color).Average();
+			return color.Average(Channels.RGBA);
 		}
 	
 		public static Color ToHSV(this Color RGBColor) {

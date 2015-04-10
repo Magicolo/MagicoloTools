@@ -7,7 +7,6 @@ Asset Store Images/
 AssetStoreTools/
 !ToCopyInAssetsFolder/
 !ToCopyInAssetsFolder.meta
-*[Ss]heet*.png
 
 /*.csproj
 /*.unityproj
@@ -17,7 +16,6 @@ AssetStoreTools/
 /*.userprefs
 /*.pidb
 /*.booproj
-/*.xcf
 
 sysinfo.txt
 /Assets/Assembly-CSharp-Editor.pidb

@@ -51,23 +51,29 @@ namespace Magicolo.GraphicsTools {
 				Initialize();
 			}
 			
-			if (physicsOptionsProperty.isExpanded) {
-				EditorGUI.indentLevel += 1;
+			EditorGUI.indentLevel += 1;
 				
-				EditorGUI.BeginChangeCheck();
+			EditorGUI.BeginChangeCheck();
 				
-				ToggleButton(physicsOptionsProperty.FindPropertyRelative("generateColliders"), "Colliders Enabled".ToGUIContent(), "Colliders Disabled".ToGUIContent());
-				PropertyField(physicsOptionsProperty.FindPropertyRelative("colliderType"));
-				PropertyField(physicsOptionsProperty.FindPropertyRelative("colliderSize"));
+			ToggleButton(physicsOptionsProperty.FindPropertyRelative("generateColliders"), "Colliders Enabled".ToGUIContent(), "Colliders Disabled".ToGUIContent());
+			PropertyField(physicsOptionsProperty.FindPropertyRelative("colliderType"));
 				
-				if (EditorGUI.EndChangeCheck()) {
-					UpdateBoneColliders();
-				}
-				
-				ShowBones();
-				
-				EditorGUI.indentLevel -= 1;
+			if (physicsOptions.Is3D) {
+				PropertyField(physicsOptionsProperty.FindPropertyRelative("colliderMaterial"));
 			}
+			else {
+				PropertyField(physicsOptionsProperty.FindPropertyRelative("colliderMaterial2D"), "Collider Material".ToGUIContent());
+			}
+			
+			PropertyField(physicsOptionsProperty.FindPropertyRelative("colliderSize"));
+				
+			if (EditorGUI.EndChangeCheck()) {
+				UpdateBoneColliders();
+			}
+				
+			ShowBones();
+				
+			EditorGUI.indentLevel -= 1;
 		}
 		
 		void ShowBones() {
@@ -126,7 +132,7 @@ namespace Magicolo.GraphicsTools {
 					boneCollider = bone.AddChild(bone.name + "Collider");
 					boneCollider.transform.SetPosition(model.transform.position);
 					boneCollider.transform.rotation = Quaternion.identity;
-					boneCollider.transform.SetScale(-model.transform.localScale.x, "X");
+					boneCollider.transform.SetScale(-model.transform.localScale.x, Axis.X);
 					
 				}
 				
@@ -181,6 +187,7 @@ namespace Magicolo.GraphicsTools {
 				SphereCollider sphere = boneCollider.GetOrAddComponent<SphereCollider>();
 				sphere.radius = radius;
 				sphere.center = new Vector3(l + r, u + d, 0) / 2;
+				sphere.sharedMaterial = physicsOptions.colliderMaterial;
 			}
 		}
 		
@@ -213,6 +220,7 @@ namespace Magicolo.GraphicsTools {
 				BoxCollider box = boneCollider.GetOrAddComponent<BoxCollider>();
 				box.size = new Vector2(Mathf.Max(size.x, 0.001F), Mathf.Max(size.y, 0.001F));
 				box.center = new Vector2(l + r, u + d) / 2;
+				box.sharedMaterial = physicsOptions.colliderMaterial;
 			}
 		}
 		
@@ -245,6 +253,7 @@ namespace Magicolo.GraphicsTools {
 				CircleCollider2D circle2D = boneCollider.GetOrAddComponent<CircleCollider2D>();
 				circle2D.radius = radius;
 				circle2D.offset = new Vector2(l + r, u + d) / 2;
+				circle2D.sharedMaterial = physicsOptions.colliderMaterial2D;
 			}
 		}
 		
@@ -277,6 +286,7 @@ namespace Magicolo.GraphicsTools {
 				BoxCollider2D box2D = boneCollider.GetOrAddComponent<BoxCollider2D>();
 				box2D.size = new Vector2(Mathf.Max(size.x, 0.055F), Mathf.Max(size.y, 0.055F));
 				box2D.offset = new Vector2(l + r, u + d) / 2;
+				box2D.sharedMaterial = physicsOptions.colliderMaterial2D;
 			}
 		}
 		
@@ -443,6 +453,7 @@ namespace Magicolo.GraphicsTools {
 			if (path.Count > 2) {
 				PolygonCollider2D polygon2D = boneCollider.GetOrAddComponent<PolygonCollider2D>();
 				polygon2D.SetPath(0, path.ToArray());
+				polygon2D.sharedMaterial = physicsOptions.colliderMaterial2D;
 			}
 		}
 

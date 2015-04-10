@@ -4,78 +4,62 @@ using System.Collections;
 namespace Magicolo {
 	public static class Vector3Extensions {
 		
-		public static Vector3 SetValues(this Vector3 vector, Vector3 values, string axis) {
+		public static Vector3 SetValues(this Vector3 vector, Vector3 values, Axis axis) {
 			return ((Vector4)vector).SetValues((Vector4)values, axis);
 		}
 		
 		public static Vector3 SetValues(this Vector3 vector, Vector3 values) {
-			return vector.SetValues(values, "XYZ");
+			return vector.SetValues(values, Axis.XYZ);
 		}
 				
-		public static Vector3 Lerp(this Vector3 vector, Vector3 target, float time, string axis) {
+		public static Vector3 Lerp(this Vector3 vector, Vector3 target, float time, Axis axis) {
 			return ((Vector4)vector).Lerp((Vector4)target, time, axis);
 		}
 			
 		public static Vector3 Lerp(this Vector3 vector, Vector3 target, float time) {
-			return vector.Lerp(target, time, "XYZ");
+			return vector.Lerp(target, time, Axis.XYZ);
 		}
 		
-		public static Vector3 LerpLinear(this Vector3 vector, Vector3 target, float time, string axis) {
+		public static Vector3 LerpLinear(this Vector3 vector, Vector3 target, float time, Axis axis) {
 			return ((Vector4)vector).LerpLinear((Vector4)target, time, axis);
 		}
 		
 		public static Vector3 LerpLinear(this Vector3 vector, Vector3 target, float time) {
-			return vector.LerpLinear(target, time, "XYZ");
+			return vector.LerpLinear(target, time, Axis.XYZ);
 		}
 
-		public static Vector3 LerpAngles(this Vector3 vector, Vector3 targetAngles, float time, string axis) {
+		public static Vector3 LerpAngles(this Vector3 vector, Vector3 targetAngles, float time, Axis axis) {
 			return ((Vector4)vector).LerpAngles((Vector4)targetAngles, time, axis);
 		}
 
 		public static Vector3 LerpAngles(this Vector3 vector, Vector3 targetAngles, float time) {
-			return vector.LerpAngles(targetAngles, time, "XYZ");
+			return vector.LerpAngles(targetAngles, time, Axis.XYZ);
 		}
 
-		public static Vector3 LerpAnglesLinear(this Vector3 vector, Vector3 targetAngles, float time, string axis) {
+		public static Vector3 LerpAnglesLinear(this Vector3 vector, Vector3 targetAngles, float time, Axis axis) {
 			return ((Vector4)vector).LerpAnglesLinear((Vector4)targetAngles, time, axis);
 		}
 		
 		public static Vector3 LerpAnglesLinear(this Vector3 vector, Vector3 targetAngles, float time) {
-			return vector.LerpAnglesLinear(targetAngles, time, "XYZ");
+			return vector.LerpAnglesLinear(targetAngles, time, Axis.XYZ);
 		}
 		
-		public static Vector3 Oscillate(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center, float offset, string axis) {
+		public static Vector3 Oscillate(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center, float offset, Axis axis) {
 			return ((Vector4)vector).Oscillate((Vector4)frequency, (Vector4)amplitude, (Vector4)center, offset, axis);
 		}
 		
 		public static Vector3 Oscillate(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center, float offset) {
-			return vector.Oscillate(frequency, amplitude, center, offset, "XYZ");
+			return vector.Oscillate(frequency, amplitude, center, offset, Axis.XYZ);
 		}
 		
-		public static Vector3 Oscillate(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center, string axis) {
+		public static Vector3 Oscillate(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center, Axis axis) {
 			return vector.Oscillate(frequency, amplitude, center, 0, axis);
 		}
 		
 		public static Vector3 Oscillate(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center) {
-			return vector.Oscillate(frequency, amplitude, center, 0, "XYZ");
-		}
-		
-		public static Vector3 OscillateAngles(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center, float offset, string axis) {
-			return ((Vector4)vector).OscillateAngles((Vector4)frequency, (Vector4)amplitude, (Vector4)center, offset, axis);
+			return vector.Oscillate(frequency, amplitude, center, 0, Axis.XYZ);
 		}
 
-		public static Vector3 OscillateAngles(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center, float offset) {
-			return vector.OscillateAngles(frequency, amplitude, center, offset, "XYZ");
-		}
-
-		public static Vector3 OscillateAngles(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center, string axis) {
-			return vector.OscillateAngles(frequency, amplitude, center, 0, axis);
-		}
-
-		public static Vector3 OscillateAngles(this Vector3 vector, Vector3 frequency, Vector3 amplitude, Vector3 center) {
-			return vector.OscillateAngles(frequency, amplitude, center, 0, "XYZ");
-		}
-		
 		public static bool Intersects(this Vector3 vector, Rect rect) {
 			return vector.x >= rect.xMin && vector.x <= rect.xMax && vector.y >= rect.yMin && vector.y <= rect.yMax;
 		}
@@ -111,80 +95,80 @@ namespace Magicolo {
 			return vector;
 		}
 	
-		public static Vector3 Mult(this Vector3 vector, Vector3 otherVector, string axis) {
+		public static Vector3 Mult(this Vector3 vector, Vector3 otherVector, Axis axis) {
 			return ((Vector4)vector).Mult(otherVector, axis);
 		}
 	
 		public static Vector3 Mult(this Vector3 vector, Vector3 otherVector) {
-			return vector.Mult(otherVector, "XYZ");
+			return vector.Mult(otherVector, Axis.XYZ);
 		}
 	
-		public static Vector3 Mult(this Vector3 vector, Vector2 otherVector, string axis) {
+		public static Vector3 Mult(this Vector3 vector, Vector2 otherVector, Axis axis) {
 			return vector.Mult((Vector3)otherVector, axis);
 		}
 	
 		public static Vector3 Mult(this Vector3 vector, Vector2 otherVector) {
-			return vector.Mult((Vector3)otherVector, "XY");
+			return vector.Mult((Vector3)otherVector, Axis.XYZ);
 		}
 	
-		public static Vector3 Mult(this Vector3 vector, Vector4 otherVector, string axis) {
+		public static Vector3 Mult(this Vector3 vector, Vector4 otherVector, Axis axis) {
 			return vector.Mult((Vector3)otherVector, axis);
 		}
 	
 		public static Vector3 Mult(this Vector3 vector, Vector4 otherVector) {
-			return vector.Mult((Vector3)otherVector, "XYZ");
+			return vector.Mult((Vector3)otherVector, Axis.XYZ);
 		}
 	
-		public static Vector3 Div(this Vector3 vector, Vector3 otherVector, string axis) {
+		public static Vector3 Div(this Vector3 vector, Vector3 otherVector, Axis axis) {
 			return ((Vector4)vector).Div(otherVector, axis);
 		}
 	
 		public static Vector3 Div(this Vector3 vector, Vector3 otherVector) {
-			return vector.Div(otherVector, "XYZ");
+			return vector.Div(otherVector, Axis.XYZ);
 		}
 	
-		public static Vector3 Div(this Vector3 vector, Vector2 otherVector, string axis) {
+		public static Vector3 Div(this Vector3 vector, Vector2 otherVector, Axis axis) {
 			return vector.Div((Vector3)otherVector, axis);
 		}
 	
 		public static Vector3 Div(this Vector3 vector, Vector2 otherVector) {
-			return vector.Div((Vector3)otherVector, "XY");
+			return vector.Div((Vector3)otherVector, Axis.XYZ);
 		}
 	
-		public static Vector3 Div(this Vector3 vector, Vector4 otherVector, string axis) {
+		public static Vector3 Div(this Vector3 vector, Vector4 otherVector, Axis axis) {
 			return vector.Div((Vector3)otherVector, axis);
 		}
 	
 		public static Vector3 Div(this Vector3 vector, Vector4 otherVector) {
-			return vector.Div((Vector3)otherVector, "XYZ");
+			return vector.Div((Vector3)otherVector, Axis.XYZ);
 		}
 	
-		public static Vector3 Pow(this Vector3 vector, double power, string axis) {
+		public static Vector3 Pow(this Vector3 vector, double power, Axis axis) {
 			return ((Vector4)vector).Pow(power, axis);
 		}
 	
 		public static Vector3 Pow(this Vector3 vector, double power) {
-			return vector.Pow(power, "XYZ");
+			return vector.Pow(power, Axis.XYZ);
 		}
 	
-		public static Vector3 Round(this Vector3 vector, double step, string axis) {
+		public static Vector3 Round(this Vector3 vector, double step, Axis axis) {
 			return ((Vector4)vector).Round(step, axis);
 		}
 	
 		public static Vector3 Round(this Vector3 vector, double step) {
-			return vector.Round(step, "XYZ");
+			return vector.Round(step, Axis.XYZ);
 		}
 	
 		public static Vector3 Round(this Vector3 vector) {
-			return vector.Round(1, "XYZ");
+			return vector.Round(1, Axis.XYZ);
 		}
 	
-		public static float Average(this Vector3 vector, string axis) {
+		public static float Average(this Vector3 vector, Axis axis) {
 			return ((Vector4)vector).Average(axis);
 		}
 	
 		public static float Average(this Vector3 vector) {
-			return ((Vector4)vector).Average("XYZ");
+			return ((Vector4)vector).Average(Axis.XYZ);
 		}
 	}
 }

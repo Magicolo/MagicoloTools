@@ -15,9 +15,17 @@ namespace Magicolo.GraphicsTools {
 			Polygon2D
 		}
 	
-		public ColliderTypes colliderType;
-		[Min] public float colliderSize = 1;
+		public bool Is3D {
+			get {
+				return colliderType == ColliderTypes.Sphere || colliderType == ColliderTypes.Box;
+			}
+		}
+		
 		public bool generateColliders = true;
+		public ColliderTypes colliderType;
+		public PhysicMaterial colliderMaterial;
+		public PhysicsMaterial2D colliderMaterial2D;
+		[Min] public float colliderSize = 1;
 		public List<string> deactivatedColliders = new List<string>();
 		public bool initialized;
 	}

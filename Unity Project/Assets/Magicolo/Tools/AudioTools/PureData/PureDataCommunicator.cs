@@ -275,7 +275,7 @@ namespace Magicolo.AudioTools {
 	
 		void ReceiveList(string sendName, object[] values) {
 			if (sendName == "Debug") {
-				Logger.Log(string.Format("{0} received List: {1}", sendName, Logger.ObjectToString(values)));
+				Logger.Log(string.Format("{0} received List: {1}", sendName, Logger.ToString(values)));
 			}
 			else if (sendNameListReceiverDict.ContainsKey(sendName)) {
 				for (int i = sendNameListReceiverDict[sendName].Count - 1; i >= 0; i--) {
@@ -294,7 +294,7 @@ namespace Magicolo.AudioTools {
 	
 		void ReceiveMessage(string sendName, string message, object[] values) {
 			if (sendName == "Debug") {
-				Logger.Log(string.Format("{0} received Message: {1} {2}", sendName, message, Logger.ObjectToString(values)));
+				Logger.Log(string.Format("{0} received Message: {1} {2}", sendName, message, Logger.ToString(values)));
 			}
 			else if (sendName == "Command") {
 				pureData.commandParser.ParseCommand(message, values);

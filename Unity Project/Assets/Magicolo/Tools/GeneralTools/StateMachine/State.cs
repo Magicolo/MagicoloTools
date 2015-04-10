@@ -5,13 +5,34 @@ using Magicolo.GeneralTools;
 namespace Magicolo {
 	public abstract class State : MonoBehaviourExtended, IState {
 
-		public StateLayer layer;
-		public StateMachine machine;
+		public IStateLayer layer {
+			get {
+				return layerReference;
+			}
+		}
+		
+		public IStateMachine machine {
+			get {
+				return machineReference;
+			}
+		}
+		
+		bool isActive;
+		public bool IsActive {
+			get {
+				return isActive;
+			}
+		}
+		
+		[SerializeField] StateLayer layerReference = null;
+		[SerializeField] StateMachine machineReference = null;
 		
 		public virtual void OnEnter() {
+			isActive = true;
 		}
 
 		public virtual void OnExit() {
+			isActive = false;
 		}
 		
 		public virtual void OnAwake() {
@@ -77,6 +98,18 @@ namespace Magicolo {
 			return layer.SwitchState(stateName, index);
 		}
 
+		public bool StateIsActive<T>(int index = 0) where T : IState {
+			return layer.StateIsActive<T>(index);
+		}
+		
+		public bool StateIsActive(System.Type stateType, int index = 0) {
+			return layer.StateIsActive(stateType, index);
+		}
+		
+		public bool StateIsActive(string stateName, int index = 0) {
+			return layer.StateIsActive(stateName, index);
+		}
+		
 		public T GetActiveState<T>(int index = 0) where T : IState {
 			return layer.GetActiveState<T>(index);
 		}
@@ -100,11 +133,7 @@ namespace Magicolo {
 		public IState GetState(string stateName) {
 			return layer.GetState(stateName);
 		}
-		
-		public IState GetState(int stateIndex) {
-			return layer.GetState(stateIndex);
-		}
-		
+
 		public T GetLayer<T>() where T : IStateLayer {
 			return machine.GetLayer<T>();
 		}
@@ -115,10 +144,6 @@ namespace Magicolo {
 		
 		public IStateLayer GetLayer(string layerName) {
 			return machine.GetLayer(layerName);
-		}
-				
-		public IStateLayer GetLayer(int layerIndex) {
-			return machine.GetLayer(layerIndex);
 		}
 	}
 }

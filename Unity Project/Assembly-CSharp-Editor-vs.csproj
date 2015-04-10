@@ -49,28 +49,31 @@
      <Compile Include="Assets\Magicolo\Tools\AudioTools\PureData\Editor\PureDataCustomMenu.cs" />
      <Compile Include="Assets\Magicolo\Tools\AudioTools\PureData\Editor\PureDataEditor.cs" />
      <Compile Include="Assets\Magicolo\Tools\AudioTools\PureData\Editor\PureDataSetupEditor.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\AttributeUtility.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\ButtonDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\ClampDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\CustomAttributePropertyDrawerBase.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\DisableDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\MaxDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\MinDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\MinMaxSliderDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\PopupDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\PropertyFieldDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\SeparatorDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\ShowPropertiesDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\SingleLineVectorDrawer.cs" />
-     <Compile Include="Assets\Magicolo\Tools\EditorTools\CustomAttributes\Editor\SliderDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\AttributeUtility.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\ButtonDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\ClampDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\CustomAttributePropertyDrawerBase.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\DisableDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\EmptyDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\MaskDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\MaxDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\MinDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\MinMaxSliderDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\PopupDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\PropertyFieldDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\SeparatorDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\ShowPropertiesDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\SingleLineVectorDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\SliderDrawer.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Attributes\Editor\ToggleDrawer.cs" />
      <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomEditorBase.cs" />
      <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomEditorStyles.cs" />
+     <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomMenus.cs" />
      <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomPropertyDrawerBase.cs" />
      <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\CustomWindowBase.cs" />
      <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\SnapSettings.cs" />
      <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\SymbolsWindow.cs" />
      <Compile Include="Assets\Magicolo\Tools\EditorTools\Editor\TransformEditor.cs" />
-     <Compile Include="Assets\Magicolo\Tools\GeneralTools\ComboSystem\Editor\ComboSystemEditor.cs" />
      <Compile Include="Assets\Magicolo\Tools\GeneralTools\Spawner\Editor\SpawnerCustomMenus.cs" />
      <Compile Include="Assets\Magicolo\Tools\GeneralTools\Spawner\Editor\SpawnerEditor.cs" />
      <Compile Include="Assets\Magicolo\Tools\GeneralTools\StateMachine\Editor\StateMachineEditor.cs" />
@@ -78,8 +81,13 @@
      <Compile Include="Assets\Magicolo\Tools\GraphicsTools\Model\Editor\ModelPhysicsOptionsDrawer.cs" />
      <Compile Include="Assets\Magicolo\Tools\GraphicsTools\Model\Editor\ModelRenderOptionsDrawer.cs" />
      <Compile Include="Assets\Magicolo\Tools\GraphicsTools\RenderReorder\Editor\RenderReorderWindow.cs" />
+     <Compile Include="Assets\Magicolo\Tools\MechanicsTools\ComboSystem\Editor\ComboSystemEditor.cs" />
+     <None Include="Assets\Magicolo\Tools\MechanicsTools\FogOfWar\FogOfWar.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEditor.UI">
+ <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/Editor/UnityEditor.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.Graphs">
  <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEditor.Graphs.dll</HintPath>
@@ -111,6 +119,10 @@
  <Reference Include="UnityEditor.OSXStandalone.Extensions">
  <HintPath>C:/Program Files/Unity/Editor/Data/PlaybackEngines/macstandalonesupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
  </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-vs.csproj">
+      <Project>{BDBCE7D3-139D-3EDB-816D-FB1D73476D25}</Project>      <Name>Assembly-CSharp-vs</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

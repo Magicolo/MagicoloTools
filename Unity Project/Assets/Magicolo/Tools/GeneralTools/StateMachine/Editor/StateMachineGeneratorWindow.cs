@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Magicolo.GeneralTools;
 using UnityEngine;
 using System.Collections;
@@ -12,7 +13,10 @@ namespace Magicolo.EditorTools {
 		public string path = "Assets";
 		public string layer = "";
 		public string inherit = "";
-		List<string> states = new List<string> { "" };
+		public string subLayer = "";
+		public int callbackMask = 3;
+		List<string> states = new List<string> { "Idle", "" };
+		List<string> lockedStates = new List<string>();
 		
 		[MenuItem("Magicolo's Tools/State Machine Generator")]
 		public static void Create() {
@@ -23,6 +27,7 @@ namespace Magicolo.EditorTools {
 			ShowPath();
 			ShowLayer();
 			ShowStates();
+			ShowGeneratesButton();
 			minSize = new Vector2(minSize.x, states.Count * 16 + 180);
 			maxSize = new Vector2(maxSize.x, minSize.y);
 		}
@@ -56,30 +61,62 @@ namespace Magicolo.EditorTools {
 			EditorGUILayout.EndHorizontal();
 			
 			ShowInherit();
-			ShowGenerateLayerButton();
+			ShowSubLayer();
 			
 			CustomEditorBase.Separator();
 		}
 
 		void ShowInherit() {
-			List<string> options = new List<string>{ "StateLayer" };
+			List<string> options = new List<string>{ " " };
 			options.AddRange(StateMachineUtility.LayerTypes.ToStringArray());
 			
 			EditorGUILayout.BeginHorizontal();
 			
-			EditorGUILayout.LabelField("Inherits from", GUILayout.Width(100));
+			EditorGUILayout.LabelField("Inherits From", GUILayout.Width(100));
 			inherit = CustomEditorBase.Popup(inherit, options.ToArray(), GUIContent.none, GUILayout.MinWidth(150));
-
+			inherit = inherit == " " ? "StateLayer" : inherit;
+			
 			EditorGUILayout.EndHorizontal();
 			
+			if (inherit == "StateLayer") {
+				lockedStates.Clear();
+			}
+			else {
+				lockedStates = StateMachineUtility.LayerStateNameDict[StateMachineUtility.FormatLayer(inherit)];
+					
+				for (int i = lockedStates.Count - 1; i >= 0; i--) {
+					if (!states.Contains(lockedStates[i])) {
+						AddState(lockedStates[i]);
+					}
+					
+					states.Move(states.IndexOf(lockedStates[i]), 0);
+				}
+			}
+			
+		}
+
+		void ShowSubLayer() {
+			List<string> options = new List<string>{ " " };
+			options.AddRange(StateMachineUtility.LayerTypes.ToStringArray());
+			
+			EditorGUILayout.BeginHorizontal();
+			
+			EditorGUILayout.LabelField("Sublayer Of", GUILayout.Width(100));
+			subLayer = CustomEditorBase.Popup(subLayer, options.ToArray(), GUIContent.none, GUILayout.MinWidth(150));
+			subLayer = subLayer == " " ? "" : subLayer;
+			
+			EditorGUILayout.EndHorizontal();
 		}
 		
 		void ShowStates() {
 			EditorGUILayout.BeginHorizontal();
 			
-			EditorGUILayout.LabelField("States", new GUIStyle("boldLabel"));
+			EditorGUILayout.LabelField("States", new GUIStyle("boldLabel"), GUILayout.Width(100));
+			
+			callbackMask = EditorGUILayout.MaskField(callbackMask, StateMachineUtility.FullCallbackNames, GUILayout.Width(position.width / 2.55F));
+			
 			if (CustomEditorBase.AddButton()) {
-				states.Add("");
+				AddState("");
 			}
 			
 			GUILayout.Space(6);
@@ -90,39 +127,54 @@ namespace Magicolo.EditorTools {
 			
 			for (int i = 0; i < states.Count; i++) {
 				EditorGUILayout.BeginHorizontal();
+				EditorGUI.BeginDisabledGroup(lockedStates.Contains(states[i]));
 				
 				states[i] = EditorGUILayout.TextField(states[i]);
+				
 				if (CustomEditorBase.DeleteButton()) {
-					states.RemoveAt(i);
+					RemoveState(i);
 					break;
 				}
 				
 				GUILayout.Space(6);
 				
+				EditorGUI.EndDisabledGroup();
 				EditorGUILayout.EndHorizontal();
 			}
 			
+			if (EditorGUIUtility.editingTextField && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Tab) {
+				AddState("");
+			}
+			
 			EditorGUI.indentLevel -= 1;
-			
-			ShowGenerateStatesButton();
-			
 			CustomEditorBase.Separator();
 		}
 
-		void ShowGenerateLayerButton() {
-			EditorGUILayout.Space();
+		void ShowGeneratesButton() {
+			if (CustomEditorBase.LargeButton("Generate".ToGUIContent())) {
+				Generate();
+			}
 			
-			if (CustomEditorBase.LargeButton("Generate Layer".ToGUIContent())) {
-				GenerateLayer();
+			CustomEditorBase.Separator();
+		}
+		
+		void AddState(string stateName) {
+			states.Add(stateName);
+		}
+		
+		void RemoveState(int index) {
+			states.RemoveAt(index);
+			
+			if (states.Count == 0) {
+				states.Add("");
 			}
 		}
 		
-		void ShowGenerateStatesButton() {
-			EditorGUILayout.Space();
-			
-			if (CustomEditorBase.LargeButton("Generate States".ToGUIContent())) {
-				GenerateStates();
-			}
+		void Generate() {
+			GenerateLayer();
+			GenerateStates();
+			AssetDatabase.Refresh();
+			Save();
 		}
 		
 		void GenerateLayer() {
@@ -138,26 +190,25 @@ namespace Magicolo.EditorTools {
 			}
 			
 			string layerFileName = layer.Capitalized() + ".cs";
-			List<string> layerScript = new List<string>();
+			List<string> script = new List<string>();
 			
 			if (!string.IsNullOrEmpty(HelperFunctions.GetAssetPath(layerFileName))) {
-				Logger.LogError(string.Format("A script named {0} already exists.", layerFileName));
 				return;
 			}
 
-			layerScript.Add("using UnityEngine;");
-			layerScript.Add("using System.Collections;");
-			layerScript.Add("using System.Collections.Generic;");
-			layerScript.Add("using Magicolo;");
-			layerScript.Add("");
-			layerScript.Add("public class " + layer + " : " + inherit + " {");
-			layerScript.Add("	");
-			layerScript.Add("	");
-			layerScript.Add("}");
+			script.Add("using UnityEngine;");
+			script.Add("using System.Collections;");
+			script.Add("using System.Collections.Generic;");
+			script.Add("using Magicolo;");
+			script.Add("");
+			script.Add("public class " + layer + " : " + inherit + " {");
+			script.Add("	");
+			AddLayer(script, subLayer);
+			AddMachine(script);
+			AddCallbacks(script, callbackMask);
+			script.Add("}");
 			
-			File.WriteAllLines(Application.dataPath.Substring(0, Application.dataPath.Length - 6) + Path.AltDirectorySeparatorChar + path + Path.AltDirectorySeparatorChar + layerFileName, layerScript.ToArray());
-			AssetDatabase.Refresh();
-			Save();
+			File.WriteAllLines(Application.dataPath.Substring(0, Application.dataPath.Length - 6) + Path.AltDirectorySeparatorChar + path + Path.AltDirectorySeparatorChar + layerFileName, script.ToArray());
 			#endif
 		}
 		
@@ -176,7 +227,7 @@ namespace Magicolo.EditorTools {
 			foreach (string state in states) {
 				string stateFileName = layer.Capitalized() + state.Capitalized() + ".cs";
 				string stateInherit = "State";
-				List<string> stateScript = new List<string>();
+				List<string> script = new List<string>();
 				
 				if (string.IsNullOrEmpty(state)) {
 					continue;
@@ -192,34 +243,55 @@ namespace Magicolo.EditorTools {
 					stateInherit = inherit + state;
 				}
 				
-				stateScript.Add("using UnityEngine;");
-				stateScript.Add("using System.Collections;");
-				stateScript.Add("using System.Collections.Generic;");
-				stateScript.Add("using Magicolo;");
-				stateScript.Add("");
-				stateScript.Add("public class " + layer + state + " : " + stateInherit + " {");
-				stateScript.Add("	");
-				stateScript.Add("    " + layer + " Layer {");
-				stateScript.Add("    	get { return ((" + layer + ")layer); }");
-				stateScript.Add("    }");
-				stateScript.Add("	");
-				stateScript.Add("	public override void OnEnter() {");
-				stateScript.Add("		base.OnEnter();");
-				stateScript.Add("		");
-				stateScript.Add("	}");
-				stateScript.Add("	");
-				stateScript.Add("	public override void OnExit() {");
-				stateScript.Add("		base.OnExit();");
-				stateScript.Add("		");
-				stateScript.Add("	}");
-				stateScript.Add("}");
+				script.Add("using UnityEngine;");
+				script.Add("using System.Collections;");
+				script.Add("using System.Collections.Generic;");
+				script.Add("using Magicolo;");
+				script.Add("");
+				script.Add("public class " + layer + state + " : " + stateInherit + " {");
+				script.Add("	");
+				AddLayer(script, layer);
+				AddMachine(script);
+				AddCallbacks(script, callbackMask);
+				script.Add("}");
 				
-				File.WriteAllLines(Application.dataPath.Substring(0, Application.dataPath.Length - 6) + path + Path.AltDirectorySeparatorChar + stateFileName, stateScript.ToArray());
+				File.WriteAllLines(Application.dataPath.Substring(0, Application.dataPath.Length - 6) + path + Path.AltDirectorySeparatorChar + stateFileName, script.ToArray());
+			}
+			#endif
+		}
+		
+		void AddLayer(List<string> script, string layerName) {
+			if (string.IsNullOrEmpty(layerName)) {
+				return;
 			}
 			
-			AssetDatabase.Refresh();
-			Save();
-			#endif
+			script.Add("    " + layerName + " Layer {");
+			script.Add("    	get { return ((" + layerName + ")layer); }");
+			script.Add("    }");
+			script.Add("    ");
+		}
+		
+		void AddMachine(List<string> script) {
+			script.Add("    StateMachine Machine {");
+			script.Add("    	get { return ((StateMachine)machine); }");
+			script.Add("    }");
+			script.Add("	");
+		}
+		
+		void AddCallbacks(List<string> script, int callbacks) {
+			for (int i = 0; i < StateMachineUtility.FullCallbackNames.Length; i++) {
+				if ((callbacks & 1 << i) != 0) {
+					script.Add("	public override void " + StateMachineUtility.CallbackOverrideMethods[i] + " {");
+					script.Add("		base." + StateMachineUtility.CallbackBaseMethods[i] + ";");
+					script.Add("		");
+					script.Add("	}");
+					script.Add("	");
+				}
+			}
+			
+			if (script.Count > 0) {
+				script.PopLast();
+			}
 		}
 	}
 }

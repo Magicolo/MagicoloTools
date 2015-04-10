@@ -39,13 +39,16 @@ namespace Magicolo.EditorTools {
 			Rect indentedPosition = EditorGUI.IndentedRect(currentPosition);
 			boolProperty.SetValue(EditorGUI.Toggle(indentedPosition, boolProperty.GetValue<bool>(), new GUIStyle("button")));
 			
+			GUIStyle style = new GUIStyle("label");
+			style.clipping = TextClipping.Overflow;
+			
 			if (boolProperty.GetValue<bool>()) {
-				Rect labelPosition = new Rect(indentedPosition.x + indentedPosition.width / 2 - trueLabel.text.GetWidth(EditorStyles.standardFont) / 2 - 16, indentedPosition.y, indentedPosition.width, indentedPosition.height);
-				EditorGUI.LabelField(labelPosition, trueLabel);
+				Rect labelPosition = new Rect(indentedPosition.x + indentedPosition.width / 2 - trueLabel.text.GetWidth(EditorStyles.standardFont) / 2, indentedPosition.y, indentedPosition.width, indentedPosition.height);
+				EditorGUI.LabelField(labelPosition, trueLabel, style);
 			}
 			else {
-				Rect labelPosition = new Rect(indentedPosition.x + indentedPosition.width / 2 - falseLabel.text.GetWidth(EditorStyles.standardFont) / 2 - 16, indentedPosition.y, indentedPosition.width, indentedPosition.height);
-				EditorGUI.LabelField(labelPosition, falseLabel);
+				Rect labelPosition = new Rect(indentedPosition.x + indentedPosition.width / 2 - falseLabel.text.GetWidth(EditorStyles.standardFont) / 2, indentedPosition.y, indentedPosition.width, indentedPosition.height);
+				EditorGUI.LabelField(labelPosition, falseLabel, style);
 			}
 			
 			currentPosition.y += currentPosition.height + 2;

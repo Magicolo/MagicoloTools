@@ -186,18 +186,37 @@ namespace Magicolo.EditorTools {
 			return pressed;
 		}
 		
-		public static bool DeleteButton() {
+		public static bool DeleteButton(ButtonAlign align) {
 			GUIStyle style = new GUIStyle("MiniToolbarButtonLeft");
 			style.clipping = TextClipping.Overflow;
 			
-			bool pressed = Button("−".ToGUIContent(), style, ButtonAlign.Right, true, GUILayout.Width(16));
+			bool pressed = Button("−".ToGUIContent(), style, align, true, GUILayout.Width(16));
 			
 			return pressed;
 		}
 		
-		public static string FolderPathButton(string path, string relativeTo, GUIContent label) {
+		public static bool DeleteButton() {
+			return DeleteButton(ButtonAlign.Right);
+		}
+		
+		public bool DeleteButton(SerializedProperty property, int indexToRemove, ButtonAlign align, DeleteCallback deleteCallback = null) {
+			bool pressed = false;
+			
+			if (DeleteButton(align)) {
+				DeleteFromArray(property, indexToRemove, deleteCallback);
+				pressed = true;
+			}
+			
+			return pressed;
+		}
+		
+		public bool DeleteButton(SerializedProperty property, int indexToRemove, DeleteCallback deleteCallback = null) {
+			return DeleteButton(property, indexToRemove, ButtonAlign.Right, deleteCallback);
+		}
+		
+		public static string FolderPathButton(string path, string relativeTo, GUIContent label, params GUILayoutOption[] options) {
 			Rect rect = EditorGUILayout.BeginHorizontal();
-			EditorGUILayout.LabelField(" ");
+			EditorGUILayout.LabelField(" ", options);
 			EditorGUILayout.EndHorizontal();
 			
 			rect = EditorGUI.PrefixLabel(rect, label);
@@ -223,39 +242,39 @@ namespace Magicolo.EditorTools {
 			return path;
 		}
 
-		public static string FolderPathButton(string path, string relativeTo) {
-			return FolderPathButton(path, relativeTo, GUIContent.none);
+		public static string FolderPathButton(string path, string relativeTo, params GUILayoutOption[] options) {
+			return FolderPathButton(path, relativeTo, GUIContent.none, options);
 		}
 
-		public static string FolderPathButton(string path, GUIContent label) {
-			return FolderPathButton(path, "", label);
+		public static string FolderPathButton(string path, GUIContent label, params GUILayoutOption[] options) {
+			return FolderPathButton(path, "", label, options);
 		}
 		
-		public static string FolderPathButton(string path) {
-			return FolderPathButton(path, "", GUIContent.none);
+		public static string FolderPathButton(string path, params GUILayoutOption[] options) {
+			return FolderPathButton(path, "", GUIContent.none, options);
 		}
 			
-		public static void FolderPathButton(SerializedProperty stringProperty, string relativeTo, GUIContent label) {
+		public static void FolderPathButton(SerializedProperty stringProperty, string relativeTo, GUIContent label, params GUILayoutOption[] options) {
 			label = label ?? stringProperty.ToGUIContent();
 			
-			stringProperty.SetValue(FolderPathButton(stringProperty.GetValue<string>(), relativeTo, label));
+			stringProperty.SetValue(FolderPathButton(stringProperty.GetValue<string>(), relativeTo, label, options));
 		}
 
-		public static void FolderPathButton(SerializedProperty stringProperty, string relativeTo) {
-			FolderPathButton(stringProperty, relativeTo, null);
+		public static void FolderPathButton(SerializedProperty stringProperty, string relativeTo, params GUILayoutOption[] options) {
+			FolderPathButton(stringProperty, relativeTo, null, options);
 		}
 
-		public static void FolderPathButton(SerializedProperty stringProperty, GUIContent label) {
-			FolderPathButton(stringProperty, "", label);
+		public static void FolderPathButton(SerializedProperty stringProperty, GUIContent label, params GUILayoutOption[] options) {
+			FolderPathButton(stringProperty, "", label, options);
 		}
 		
-		public static void FolderPathButton(SerializedProperty stringProperty) {
-			FolderPathButton(stringProperty, "", null);
+		public static void FolderPathButton(SerializedProperty stringProperty, params GUILayoutOption[] options) {
+			FolderPathButton(stringProperty, "", null, options);
 		}
 			
-		public static string FilePathButton(string path, string relativeTo, string extension, GUIContent label) {
+		public static string FilePathButton(string path, string relativeTo, string extension, GUIContent label, params GUILayoutOption[] options) {
 			Rect rect = EditorGUILayout.BeginHorizontal();
-			EditorGUILayout.LabelField(" ");
+			EditorGUILayout.LabelField(" ", options);
 			EditorGUILayout.EndHorizontal();
 			
 			rect = EditorGUI.PrefixLabel(rect, label);
@@ -282,59 +301,50 @@ namespace Magicolo.EditorTools {
 			return path;
 		}
 
-		public static string FilePathButton(string path, string relativeTo, string extension) {
-			return FilePathButton(path, relativeTo, extension, GUIContent.none);
+		public static string FilePathButton(string path, string relativeTo, string extension, params GUILayoutOption[] options) {
+			return FilePathButton(path, relativeTo, extension, GUIContent.none, options);
 		}
 
-		public static string FilePathButton(string path, string relativeTo) {
-			return FilePathButton(path, relativeTo, "", GUIContent.none);
+		public static string FilePathButton(string path, string relativeTo, params GUILayoutOption[] options) {
+			return FilePathButton(path, relativeTo, "", GUIContent.none, options);
 		}
 
-		public static string FilePathButton(string path, string relativeTo, GUIContent label) {
-			return FilePathButton(path, "", relativeTo, label);
+		public static string FilePathButton(string path, string relativeTo, GUIContent label, params GUILayoutOption[] options) {
+			return FilePathButton(path, "", relativeTo, label, options);
 		}
 		
-		public static string FilePathButton(string path, GUIContent label) {
-			return FilePathButton(path, "", "", label);
+		public static string FilePathButton(string path, GUIContent label, params GUILayoutOption[] options) {
+			return FilePathButton(path, "", "", label, options);
 		}
 		
-		public static string FilePathButton(string path) {
-			return FilePathButton(path, "", "", GUIContent.none);
+		public static string FilePathButton(string path, params GUILayoutOption[] options) {
+			return FilePathButton(path, "", "", GUIContent.none, options);
 		}
 			
-		public static void FilePathButton(SerializedProperty stringProperty, string relativeTo, string extension, GUIContent label) {
+		public static void FilePathButton(SerializedProperty stringProperty, string relativeTo, string extension, GUIContent label, params GUILayoutOption[] options) {
 			label = label ?? stringProperty.ToGUIContent();
 			
-			stringProperty.SetValue(FilePathButton(stringProperty.GetValue<string>(), relativeTo, extension, label));
+			stringProperty.SetValue(FilePathButton(stringProperty.GetValue<string>(), relativeTo, extension, label, options));
 		}
 
-		public static void FilePathButton(SerializedProperty stringProperty, string relativeTo, string extension) {
-			FilePathButton(stringProperty, relativeTo, extension, null);
+		public static void FilePathButton(SerializedProperty stringProperty, string relativeTo, string extension, params GUILayoutOption[] options) {
+			FilePathButton(stringProperty, relativeTo, extension, null, options);
 		}
 
-		public static void FilePathButton(SerializedProperty stringProperty, string relativeTo, GUIContent label) {
-			FilePathButton(stringProperty, relativeTo, "", label);
+		public static void FilePathButton(SerializedProperty stringProperty, string relativeTo, GUIContent label, params GUILayoutOption[] options) {
+			FilePathButton(stringProperty, relativeTo, "", label, options);
 		}
 
-		public static void FilePathButton(SerializedProperty stringProperty, string relativeTo) {
-			FilePathButton(stringProperty, relativeTo, "", null);
+		public static void FilePathButton(SerializedProperty stringProperty, string relativeTo, params GUILayoutOption[] options) {
+			FilePathButton(stringProperty, relativeTo, "", null, options);
 		}
 		
-		public static void FilePathButton(SerializedProperty stringProperty, GUIContent label) {
-			FilePathButton(stringProperty, "", "", label);
+		public static void FilePathButton(SerializedProperty stringProperty, GUIContent label, params GUILayoutOption[] options) {
+			FilePathButton(stringProperty, "", "", label, options);
 		}
 		
-		public static void FilePathButton(SerializedProperty stringProperty) {
-			FilePathButton(stringProperty, "", "", null);
-		}
-	
-		public bool DeleteButton(SerializedProperty property, int indexToRemove, DeleteCallback deleteCallback = null) {
-			bool pressed = false;
-			if (DeleteButton()) {
-				DeleteFromArray(property, indexToRemove, deleteCallback);
-				pressed = true;
-			}
-			return pressed;
+		public static void FilePathButton(SerializedProperty stringProperty, params GUILayoutOption[] options) {
+			FilePathButton(stringProperty, "", "", null, options);
 		}
 		#endregion
 		
@@ -688,7 +698,7 @@ namespace Magicolo.EditorTools {
 		}
 
 		public bool UniqueNameField(INamable namable, INamable[] namables, GUIContent label, GUIStyle style, params GUILayoutOption[] options) {
-			style = style ?? new GUIStyle("label");
+			style = style ?? new GUIStyle("textField");
 			bool changed = false;
 			
 			EditorGUI.BeginDisabledGroup(Application.isPlaying);
@@ -770,7 +780,7 @@ namespace Magicolo.EditorTools {
 		}
 							
 		public static string Popup(string currentOption, string[] displayedOptions, GUIContent label, GUIStyle style, params GUILayoutOption[] options) {
-			style = style ?? new GUIStyle("popup");
+			style = style ?? new GUIStyle("MiniPopup");
 			int index = System.Array.IndexOf(displayedOptions, currentOption);
 			int currentIndex = EditorGUILayout.Popup(label, index, displayedOptions.ToGUIContents(), style, options);
 			
@@ -889,7 +899,7 @@ namespace Magicolo.EditorTools {
 				return;
 			}
 			
-			string arrayIdentifier = arrayProperty.name + arrayProperty.arraySize + arrayProperty.depth + arrayProperty.propertyPath + arrayProperty.propertyType;
+			string arrayIdentifier = string.Format("{0}{1}{2}{3}{4}", arrayProperty.name, arrayProperty.arraySize, arrayProperty.depth, arrayProperty.propertyPath, arrayProperty.propertyType);
 			SerializedProperty selectedArray = DragAndDrop.GetGenericData(arrayIdentifier) as SerializedProperty;
 			int selectedIndex = DragAndDrop.GetGenericData("Selected Index") == null ? -1 : (int)DragAndDrop.GetGenericData("Selected Index");
 			int targetIndex = DragAndDrop.GetGenericData("Target Index") == null ? -1 : (int)DragAndDrop.GetGenericData("Target Index");
@@ -984,6 +994,12 @@ namespace Magicolo.EditorTools {
 				EditorGUILayout.EndVertical();
 			}
 		}
+		
+		public static void Space(int amount) {
+			for (int i = 0; i < amount; i++) {
+				GUILayout.Label("");
+			}
+		}
 		#endregion
 		
 		#region Utility
@@ -1006,11 +1022,7 @@ namespace Magicolo.EditorTools {
 
 		public static void AddToArray(SerializedProperty arrayProperty, AddCallback addCallback = null) {
 			if (addCallback == null) {
-				arrayProperty.arraySize += 1;
-				arrayProperty.isExpanded = true;
-				arrayProperty.GetLastArrayElement().isExpanded = true;
-				arrayProperty.serializedObject.ApplyModifiedProperties();
-				EditorUtility.SetDirty(arrayProperty.serializedObject.targetObject);
+				arrayProperty.Add(null);
 			}
 			else {
 				addCallback(arrayProperty);
@@ -1019,14 +1031,12 @@ namespace Magicolo.EditorTools {
 
 		public void DeleteFromArray(SerializedProperty arrayProperty, int indexToRemove, DeleteCallback deleteCallback = null) {
 			if (deleteCallback == null) {
-				arrayProperty.GetArrayElementAtIndex(indexToRemove).SetValue(null);
-				arrayProperty.DeleteArrayElementAtIndex(indexToRemove);
-				arrayProperty.serializedObject.ApplyModifiedProperties();
-				EditorUtility.SetDirty(arrayProperty.serializedObject.targetObject);
+				arrayProperty.RemoveAt(indexToRemove);
 			}
 			else {
 				deleteCallback(arrayProperty, indexToRemove);
 			}
+			
 			deleteBreak = true;
 		}
 

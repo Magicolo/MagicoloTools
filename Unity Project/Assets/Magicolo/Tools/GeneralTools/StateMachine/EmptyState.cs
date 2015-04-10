@@ -17,6 +17,24 @@ namespace Magicolo {
 			}
 		}
 
+		public IStateLayer layer {
+			get {
+				throw new System.NotImplementedException();
+			}
+		}
+
+		public IStateMachine machine {
+			get {
+				throw new System.NotImplementedException();
+			}
+		}
+
+		public bool IsActive {
+			get {
+				throw new System.NotImplementedException();
+			}
+		}
+		
 		public void OnEnter() {
 		}
 
@@ -72,6 +90,82 @@ namespace Magicolo {
 		}
 
 		public void TriggerExit2D(Collider2D collision) {
+		}
+
+		public T SwitchState<T>(int index = 0) where T : IState {
+			throw new System.NotImplementedException();
+		}
+
+		public IState SwitchState(System.Type stateType, int index = 0) {
+			throw new System.NotImplementedException();
+		}
+
+		public IState SwitchState(string stateName, int index = 0) {
+			throw new System.NotImplementedException();
+		}
+
+		public bool StateIsActive<T>(int index = 0) where T : IState {
+			throw new System.NotImplementedException();
+		}
+
+		public bool StateIsActive(System.Type stateType, int index = 0) {
+			throw new System.NotImplementedException();
+		}
+
+		public bool StateIsActive(string stateName, int index = 0) {
+			throw new System.NotImplementedException();
+		}
+
+		public T GetActiveState<T>(int index = 0) where T : IState {
+			throw new System.NotImplementedException();
+		}
+
+		public IState GetActiveState(int index = 0) {
+			throw new System.NotImplementedException();
+		}
+
+		public IState[] GetActiveStates() {
+			throw new System.NotImplementedException();
+		}
+
+		public T GetState<T>() where T : IState {
+			throw new System.NotImplementedException();
+		}
+
+		public IState GetState(System.Type stateType) {
+			throw new System.NotImplementedException();
+		}
+
+		public IState GetState(string stateName) {
+			throw new System.NotImplementedException();
+		}
+
+		public IState GetState(int stateIndex) {
+			throw new System.NotImplementedException();
+		}
+
+		public IState[] GetStates() {
+			throw new System.NotImplementedException();
+		}
+
+		public T GetLayer<T>() where T : IStateLayer {
+			throw new System.NotImplementedException();
+		}
+
+		public IStateLayer GetLayer(System.Type layerType) {
+			throw new System.NotImplementedException();
+		}
+
+		public IStateLayer GetLayer(string layerName) {
+			throw new System.NotImplementedException();
+		}
+
+		public IStateLayer GetLayer(int layerIndex) {
+			throw new System.NotImplementedException();
+		}
+
+		public IStateLayer[] GetLayers() {
+			throw new System.NotImplementedException();
 		}
 	}
 }

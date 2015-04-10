@@ -41,7 +41,7 @@ namespace Magicolo.AudioTools {
 		}
 		
 		public string GetValueDisplayName() {
-			return Logger.ObjectToString(GetValue());
+			return Logger.ToString(GetValue());
 		}
 	
 		public T GetValue<T>() {

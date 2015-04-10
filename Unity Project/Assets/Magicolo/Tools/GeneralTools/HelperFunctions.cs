@@ -20,6 +20,42 @@ namespace Magicolo {
 		public static float MidiToFrequency(float note) {
 			return Mathf.Pow(2, (note - 69) / 12) * 440;
 		}
+
+		public static KeyCode[] GetKeys() {
+			List<KeyCode> keys = new List<KeyCode>();
+			
+			foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode))) {
+				if (Input.GetKey(key)) {
+					keys.Add(key);
+				}
+			}
+			
+			return keys.ToArray();
+		}
+		
+		public static KeyCode[] GetKeysDown() {
+			List<KeyCode> keys = new List<KeyCode>();
+			
+			foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode))) {
+				if (Input.GetKeyDown(key)) {
+					keys.Add(key);
+				}
+			}
+			
+			return keys.ToArray();
+		}
+		
+		public static KeyCode[] GetKeysUp() {
+			List<KeyCode> keys = new List<KeyCode>();
+			
+			foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode))) {
+				if (Input.GetKeyUp(key)) {
+					keys.Add(key);
+				}
+			}
+			
+			return keys.ToArray();
+		}
 		
 		public static float Hypotenuse(float a) {
 			return Hypotenuse(a, a);
@@ -51,19 +87,53 @@ namespace Magicolo {
 			return extension;
 		}
 		
-		public static T[] LoadAllAssetsOfType<T>() where T : Object {
+		public static T[] LoadAllAssetsOfTypeAtPath<T>(string path) where T : Object {
 			List<T> assets = new List<T>();
 			string extension = GetExtensionForType<T>();
 			
 			#if UNITY_EDITOR
-			foreach (string path in UnityEditor.AssetDatabase.GetAllAssetPaths()) {
-				if (path.EndsWith(extension)) {
-					assets.Add(UnityEditor.AssetDatabase.LoadAssetAtPath(path, typeof(T)) as T);
+			foreach (string assetPath in UnityEditor.AssetDatabase.GetAllAssetPaths()) {
+				if (assetPath.StartsWith(path) && assetPath.EndsWith(extension)) {
+					assets.Add(UnityEditor.AssetDatabase.LoadAssetAtPath(assetPath, typeof(T)) as T);
 				}
 			}
 			#endif
 		
 			return assets.ToArray();
+		}
+		
+		public static T[] LoadAllAssetsOfType<T>() where T : Object {
+			return LoadAllAssetsOfTypeAtPath<T>("");
+		}
+		
+		public static T GetDefaultAssetOfType<T>(string assetName) where T : Object {
+			T defaultAsset = default(T);
+			
+			foreach (Object asset in GetDefaultAssetsOfType<T>()) {
+				if (asset.name == assetName) {
+					defaultAsset = asset as T;
+				}
+			}
+			
+			return defaultAsset;
+		}
+		
+		public static Object GetDefaultAsset(string assetName) {
+			return GetDefaultAssetOfType<Object>(assetName);
+		}
+		
+		public static T[] GetDefaultAssetsOfType<T>() where T : Object {
+			List<T> defaultAssets = new List<T>();
+			
+			#if UNITY_EDITOR
+			foreach (Object asset in UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Library/unity default resources")) {
+				if (asset is T) {
+					defaultAssets.Add(asset as T);
+				}
+			}
+			#endif
+			
+			return defaultAssets.ToArray();
 		}
 		
 		public static string GetAssetPath(Object obj) {
@@ -240,22 +310,6 @@ namespace Magicolo {
 			copyToSerialized.ApplyModifiedProperties();
 			#endif
 		}
-		
-		public static string ColorChannelsToVectorAxis(string channels) {
-			channels = channels.Replace('R', 'X');
-			channels = channels.Replace('G', 'Y');
-			channels = channels.Replace('B', 'Z');
-			channels = channels.Replace('A', 'W');
-			return channels;
-		}
-	
-		public static string VectorAxisToColorChannels(string channels) {
-			channels = channels.Replace('X', 'R');
-			channels = channels.Replace('Y', 'G');
-			channels = channels.Replace('Z', 'B');
-			channels = channels.Replace('W', 'A');
-			return channels;
-		}
 
 		public static float RandomFloat() {
 			return (float)RandomDouble();
@@ -276,30 +330,32 @@ namespace Magicolo {
 		}
 		
 		public static T WeightedRandom<T>(Dictionary<T, float> objectsAndWeights) {
-			T[] objectList = new T[objectsAndWeights.Keys.Count];
-			float[] weightList = new float[objectsAndWeights.Values.Count];
+			T[] objects = new T[objectsAndWeights.Keys.Count];
+			float[] weights = new float[objectsAndWeights.Values.Count];
 		
-			objectsAndWeights.GetOrderedKeysValues(out objectList, out weightList);
-			return WeightedRandom<T>(objectList, weightList);
+			objectsAndWeights.GetOrderedKeysValues(out objects, out weights);
+			
+			return WeightedRandom<T>(objects, weights);
 		}
 
-		public static T WeightedRandom<T>(IList<T> objectList, IList<float> weightList) {
-			float[] weights = new float[weightList.Count];
+		public static T WeightedRandom<T>(IList<T> objects, IList<float> weights) {
+			float[] weightSums = new float[weights.Count];
 			float weightSum = 0;
 			float randomValue = 0;
 		
-			for (int i = 0; i < weights.Length; i++) {
-				weightSum += weightList[i];
-				weights[i] = weightSum;
+			for (int i = 0; i < weightSums.Length; i++) {
+				weightSum += weights[i];
+				weightSums[i] = weightSum;
 			}
 		
 			randomValue = RandomRange(0, weightSum);
 		
-			for (int i = 0; i < weights.Length; i++) {
-				if (randomValue < weights[i]) {
-					return objectList[i];
+			for (int i = 0; i < weightSums.Length; i++) {
+				if (randomValue < weightSums[i]) {
+					return objects[i];
 				}
 			}
+			
 			return default(T);
 		}
 

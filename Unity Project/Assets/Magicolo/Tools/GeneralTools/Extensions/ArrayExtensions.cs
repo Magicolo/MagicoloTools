@@ -57,6 +57,26 @@ namespace Magicolo {
 			return array != null && array.Count > 0 ? array[array.Count - 1] : default(T);
 		}
 	
+		public static Type[] GetTypes<T>(this IList<T> array) {
+			Type[] types = new Type[array.Count];
+			
+			for (int i = 0; i < array.Count; i++) {
+				types[i] = array[i].GetType();
+			}
+			
+			return types;
+		}
+			
+		public static string[] GetTypeNames<T>(this IList<T> array) {
+			string[] typeNames = new string[array.Count];
+			
+			for (int i = 0; i < array.Count; i++) {
+				typeNames[i] = array[i].GetType().Name;
+			}
+			
+			return typeNames;
+		}
+		
 		public static T GetRandom<T>(this IList<T> array) {
 			if (array == null || array.Count == 0) return default(T);
 		

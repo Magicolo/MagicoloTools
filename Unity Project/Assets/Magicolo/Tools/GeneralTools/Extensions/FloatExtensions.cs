@@ -5,7 +5,7 @@ namespace Magicolo {
 	public static class FloatExtensions {
 
 		public static float PowSign(this float f, double power) {
-			return float.IsNaN(f) ? 0 : Mathf.Pow(Mathf.Abs(f), (float)power) * (f < 0 ? -1 : 1);
+			return float.IsNaN(f) ? 0 : Mathf.Pow(Mathf.Abs(f), (float)power) * f.Sign();
 		}
 	
 		public static float PowSign(this float f) {
@@ -34,6 +34,10 @@ namespace Magicolo {
 	
 		public static float Round(this float f) {
 			return f.Round(1);
+		}
+		
+		public static int Sign(this float f) {
+			return f < 0 ? -1 : 1;
 		}
 	}
 }

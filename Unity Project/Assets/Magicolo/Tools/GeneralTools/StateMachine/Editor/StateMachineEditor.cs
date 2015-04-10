@@ -10,78 +10,49 @@ namespace Magicolo.GeneralTools {
 	[CustomEditor(typeof(StateMachine)), CanEditMultipleObjects]
 	public class StateMachineEditor : CustomEditorBase {
 
-		StateMachine stateMachine;
-		GameObject stateMachineObject;
+		StateMachine machine;
+		GameObject machineObject;
 		StateLayer[] existingLayers;
 		State[] existingStates;
 		StateMachineCaller[] existingCallers;
-		SerializedProperty callbacksProperty;
-		SerializedProperty layersProperty;
-		StateLayer currentLayer;
-		SerializedProperty currentLayerProperty;
-		SerializedObject currentLayerSerialized;
-		SerializedProperty statesProperty;
-		SerializedProperty currentStatesProperty;
-		State currentState;
-		SerializedProperty currentStateProperty;
-		SerializedObject currentStateSerialized;
 		
 		Type selectedLayerType;
-		
-		Type[] callbackTypes = { 
-			typeof(StateMachineUpdateCaller), typeof(StateMachineFixedUpdateCaller), typeof(StateMachineLateUpdateCaller),
-			typeof(StateMachineCollisionEnterCaller), typeof(StateMachineCollisionStayCaller), typeof(StateMachineCollisionExitCaller),
-			typeof(StateMachineCollisionEnter2DCaller), typeof(StateMachineCollisionStay2DCaller), typeof(StateMachineCollisionExit2DCaller),
-			typeof(StateMachineTriggerEnterCaller), typeof(StateMachineTriggerStayCaller), typeof(StateMachineTriggerExitCaller),
-			typeof(StateMachineTriggerEnter2DCaller), typeof(StateMachineTriggerStay2DCaller), typeof(StateMachineTriggerExit2DCaller)
-		};
-		
-		string[] callbacks = {
-			"OnUpdate", "OnFixedUpdate", "OnLateUpdate",
-			"CollisionEnter", "CollisionStay", "CollisionExit", 
-			"CollisionEnter2D", "CollisionStay2D", "CollisionExit2D", 
-			"TriggerEnter", "TriggerStay", "TriggerExit", 
-			"TriggerEnter2D", "TriggerStay2D", "TriggerExit2D"
-		};
+		List<Type> layerTypes;
+		List<string> layerTypesName;
 		
 		public override void OnEnable() {
 			base.OnEnable();
 			
-			stateMachine = (StateMachine)target;
-			stateMachineObject = stateMachine.gameObject;
+			machine = (StateMachine)target;
+			machineObject = machine.gameObject;
 			
 			HideMachineComponents();
 			
-			if (stateMachine.GetComponents<StateMachine>().Length > 1) {
-				Logger.LogError("There can be only one state machine (StateMachine) per game object (GameObject). Use layers (StateLayer) instead.");
-				stateMachine.Remove();
+			if (machine.GetComponents<StateMachine>().Length > 1) {
+				Logger.LogError("There can be only one StateMachine per GameObject.");
+				machine.Remove();
 			}
 		}
-		
-		public override void OnDisable() {
-			if (stateMachineObject != null) {
-				CleanUp();
-			}
-		}
-		
+
 		public override void OnInspectorGUI() {
 			Begin();
 			
 			HideMachineComponents();
 			ShowAddLayer();
-			ShowCallbacks();
-			ShowLayers();
+			ShowDebug();
+			ShowLayers(serializedObject.FindProperty("layers"));
 			Separator();
-			ShowGenerateButton();
+			ShowGenerateButton(serializedObject.FindProperty("layers"));
 			ReorderComponents();
+			CleanUp();
 			
 			End();
 		}
 
 		void HideMachineComponents() {
-			existingLayers = stateMachineObject.GetComponents<StateLayer>();
-			existingStates = stateMachineObject.GetComponents<State>();
-			existingCallers = stateMachine.GetComponents<StateMachineCaller>();
+			existingLayers = machineObject.GetComponents<StateLayer>();
+			existingStates = machineObject.GetComponents<State>();
+			existingCallers = machine.GetComponents<StateMachineCaller>();
 			
 			Array.ForEach(existingLayers, layer => layer.hideFlags = HideFlags.HideInInspector);
 			Array.ForEach(existingStates, state => state.hideFlags = HideFlags.HideInInspector);
@@ -89,180 +60,179 @@ namespace Magicolo.GeneralTools {
 		}
 
 		void ShowAddLayer() {
-			layersProperty = serializedObject.FindProperty("layers");
-			
-			List<Type> layerTypes = new List<Type>();
-			List<string> layerTypesName = new List<string>{ " " };
+			layerTypes = new List<Type>();
+			layerTypesName = new List<string>{ "Add Layer" };
 			
 			foreach (Type layerType in StateMachineUtility.LayerStateDict.Keys) {
-				if (layersProperty.TrueForAll<StateLayer>(layer => layer.GetType() != layerType)) {
+				if (Array.TrueForAll(existingLayers, layer => layer.GetType() != layerType)) {
 					layerTypes.Add(layerType);
 					layerTypesName.Add(StateMachineUtility.LayerTypeNameDict[layerType]);
 				}
 			}
 			
-			EditorGUI.BeginDisabledGroup(Application.isPlaying);
-			EditorGUILayout.BeginHorizontal();
+			if (Selection.gameObjects.Length <= 1) {
+				EditorGUI.BeginDisabledGroup(Application.isPlaying);
 			
-			EditorGUILayout.LabelField("Add Layer", new GUIStyle("boldLabel"), GUILayout.Width(75));
-			int layerTypeIndex = EditorGUILayout.Popup(layerTypes.IndexOf(selectedLayerType) + 1, layerTypesName.ToArray()) - 1;
-			selectedLayerType = layerTypeIndex == -1 ? null : layerTypes[Mathf.Clamp(layerTypeIndex, 0, layerTypes.Count - 1)];
-			
-			if (selectedLayerType != null) {
-				OnLayerAdded(layersProperty);
-			}
-			
-			EditorGUILayout.EndHorizontal();
-			EditorGUI.EndDisabledGroup();
-		}
-		
-		void ShowCallbacks() {
-			callbacksProperty = serializedObject.FindProperty("callbacks");
-			
-			EditorGUI.BeginDisabledGroup(Application.isPlaying);
-			EditorGUILayout.BeginHorizontal();
-			
-			EditorGUILayout.LabelField("Callbacks", GUILayout.Width(75));
-			int callerMask = EditorGUILayout.MaskField(callbacksProperty.GetValue<int>(), callbacks);
-			callbacksProperty.SetValue(callerMask);
-			
-			EditorGUILayout.EndHorizontal();
-			EditorGUI.EndDisabledGroup();
-			
-			List<StateMachineCaller> callers = new List<StateMachineCaller>();
-			
-			for (int i = 0; i < callbackTypes.Length; i++) {
-				if ((callerMask & 1 << i) != 0) {
-					StateMachineCaller caller = stateMachine.GetOrAddComponent(callbackTypes[i]) as StateMachineCaller;
-					
-					caller.machine = stateMachine;
-					caller.hideFlags = HideFlags.HideInInspector;
-					callers.Add(caller);
-				}
-			}
-			
-			for (int i = existingCallers.Length - 1; i >= 0; i--) {
-				StateMachineCaller caller = existingCallers[i];
+				GUIStyle style = new GUIStyle("popup");
+				style.fontStyle = FontStyle.Bold;
+				style.alignment = TextAnchor.MiddleCenter;
 				
-				if (caller != null && !callers.Contains(caller)) {
-					callers.Remove(caller);
-					caller.Remove();
+				int layerTypeIndex = EditorGUILayout.Popup(layerTypes.IndexOf(selectedLayerType) + 1, layerTypesName.ToArray(), style) - 1;
+				selectedLayerType = layerTypeIndex == -1 ? null : layerTypes[Mathf.Clamp(layerTypeIndex, 0, layerTypes.Count - 1)];
+			
+				EditorGUI.EndDisabledGroup();
+				
+				if (selectedLayerType != null) {
+					StateMachineUtility.AddLayer(machine, selectedLayerType, machine);
+					selectedLayerType = null;
 				}
+			}
+			else {
+				GUI.Box(EditorGUI.IndentedRect(EditorGUILayout.GetControlRect()), "Multi-editing is not supported.", new GUIStyle(EditorStyles.helpBox));
 			}
 		}
 		
-		void ShowLayers() {
-			CleanUpLayers();
-			
-			if (layersProperty.arraySize > 0) {
-				Separator();
-			}
+		void ShowDebug() {
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("debug"));
+		}
+		
+		void ShowLayers(SerializedProperty layersProperty) {
+			CleanUpLayers(layersProperty);
 			
 			for (int i = 0; i < layersProperty.arraySize; i++) {
-				currentLayerProperty = layersProperty.GetArrayElementAtIndex(i);
-				currentLayer = currentLayerProperty.GetValue<StateLayer>();
-				currentLayerSerialized = new SerializedObject(currentLayerProperty.objectReferenceValue);
-				statesProperty = currentLayerSerialized.FindProperty("states");
-				currentStatesProperty = currentLayerSerialized.FindProperty("currentStates");
-				
-				BeginBox();
-				
-				GUIStyle style = new GUIStyle("foldout");
-				style.fontStyle = FontStyle.Bold;
-				if (DeleteFoldOut(layersProperty, i, currentLayer.GetType().Name.ToGUIContent(), style, OnLayerDeleted)) {
-					break;
-				}
-				
-				ShowLayer();
-				
-				EndBox();
+				ShowLayer(layersProperty, i);
 			}
 		}
+		
+		void ShowLayer(SerializedProperty layersProperty, int index) {
+			SerializedProperty layerProperty = layersProperty.GetArrayElementAtIndex(index);
+			StateLayer layer = layerProperty.GetValue<StateLayer>();
+			SerializedObject layerSerialized = new SerializedObject(layer);
+			SerializedProperty statesProperty = layerSerialized.FindProperty("stateReferences");
+			SerializedProperty activeStatesProperty = layerSerialized.FindProperty("activeStateReferences");
 
-		void OnLayerDeleted(SerializedProperty arrayProperty, int indexToRemove) {
-			StateLayer layer = arrayProperty.GetArrayElementAtIndex(indexToRemove).GetValue<StateLayer>();
+			StateMachineUtility.AddMissingStates(machine, layer);
 			
-			for (int i = 0; i < statesProperty.arraySize; i++) {
-				State state = statesProperty.GetArrayElementAtIndex(i).GetValue<State>();
+			BeginBox(GetBoxStyle(layer));
+			
+			Rect rect = EditorGUILayout.BeginHorizontal();
 				
-				if (state != null) {
-					state.Remove();
-				}
+			ShowAddSubLayer(layer, rect);
+				
+			if (DeleteFoldOut(layersProperty, index, GetLayerLabel(layer), GetLayerStyle(layer))) {
+				StateMachineUtility.RemoveLayer(layer);
+				return;
 			}
+				
+			EditorGUILayout.EndHorizontal();
 			
-			layer.Remove();
-			DeleteFromArray(arrayProperty, indexToRemove);
-		}
-		
-		void OnLayerAdded(SerializedProperty arrayProperty) {
-			AddToArray(arrayProperty);
+			CleanUpStates(statesProperty);
 			
-			StateLayer newLayer = stateMachineObject.AddComponent(selectedLayerType) as StateLayer;
-			newLayer.machine = stateMachine;
-			newLayer.hideFlags = HideFlags.HideInInspector;
-			arrayProperty.GetLastArrayElement().SetValue(newLayer);
-		}
-		
-		void ShowLayer() {
-			CleanUpStates();
-			SetLayerStates();
-			
-			if (currentLayerProperty.isExpanded) {
+			if (layerProperty.isExpanded) {
 				EditorGUI.indentLevel += 1;
 				
 				List<string> currentLayerStatesName = new List<string>{ "Empty" };
 				
-				for (int i = 0; i < statesProperty.arraySize; i++) {
-					currentLayerStatesName.Add(StateMachineUtility.FormatState(statesProperty.GetArrayElementAtIndex(i).GetValue().GetType(), currentLayer));
+				foreach (IState state in statesProperty.GetValues<IState>()) {
+					currentLayerStatesName.Add(state is IStateLayer ? state.GetType().Name.Split('.').Last() : StateMachineUtility.FormatState(state.GetType(), layer));
 				}
 				
-				for (int i = 0; i < currentStatesProperty.arraySize; i++) {
-					SerializedProperty stateProperty = currentStatesProperty.GetArrayElementAtIndex(i);
+				for (int i = 0; i < activeStatesProperty.arraySize; i++) {
+					SerializedProperty activeStateProperty = activeStatesProperty.GetArrayElementAtIndex(i);
+					UnityEngine.Object activeState = activeStateProperty.objectReferenceValue;
 					
-					Rect dragArea = EditorGUILayout.BeginHorizontal();
+					if (Selection.gameObjects.Length <= 1) {
+						Rect dragArea = EditorGUILayout.BeginHorizontal();
 				
-					EditorGUI.BeginChangeCheck();
+						EditorGUI.BeginChangeCheck();
 				
-					int stateIndex = EditorGUILayout.Popup(string.Format("Active State ({0})", i), stateProperty.objectReferenceValue == null ? 0 : statesProperty.IndexOf(stateProperty.objectReferenceValue) + 1, currentLayerStatesName.ToArray(), GUILayout.MinWidth(200)) - 1;
-					stateProperty.SetValue(stateIndex == -1 ? null : statesProperty.GetArrayElementAtIndex(Mathf.Clamp(stateIndex, 0, statesProperty.arraySize - 1)).GetValue());
+						int stateIndex = EditorGUILayout.Popup(string.Format("Active State ({0})", i), statesProperty.IndexOf(activeState) + 1, currentLayerStatesName.ToArray(), GUILayout.MinWidth(200)) - 1;
+						activeState = stateIndex == -1 ? null : statesProperty.GetValue<UnityEngine.Object>(Mathf.Clamp(stateIndex, 0, statesProperty.arraySize - 1));
+						activeStateProperty.SetValue(activeState);
 					
-					if (EditorGUI.EndChangeCheck() && Application.isPlaying) {
-						currentLayer.SwitchState(stateProperty.objectReferenceValue == null ? typeof(EmptyState) : stateProperty.objectReferenceValue.GetType(), i);
-					}
+						if (EditorGUI.EndChangeCheck() && Application.isPlaying) {
+							layer.SwitchState(activeState == null ? typeof(EmptyState) : activeState.GetType(), i);
+						}
 				
-					if (i == 0) {
-						SmallAddButton(currentStatesProperty);
-					}
-					else if (DeleteButton(currentStatesProperty, i)) {
-						break;
-					}
+						if (i == 0) {
+							SmallAddButton(activeStatesProperty);
+						}
+						else if (DeleteButton(activeStatesProperty, i)) {
+							break;
+						}
 					
-					EditorGUILayout.EndHorizontal();
+						EditorGUILayout.EndHorizontal();
 					
-					Reorderable(currentStatesProperty, i, true, EditorGUI.IndentedRect(dragArea));
+						Reorderable(activeStatesProperty, i, true, EditorGUI.IndentedRect(dragArea));
+					}
+					else {
+						GUI.Box(EditorGUI.IndentedRect(EditorGUILayout.GetControlRect()), "Multi-editing is not supported.", new GUIStyle(EditorStyles.helpBox));
+					}
 				}
 				
 				Separator();
-				ShowLayerFields();
-				ShowStates();
-				if (statesProperty.arraySize > 0) Separator();
+				ShowLayerFields(layerSerialized);
+				
+				bool stateSeparator = statesProperty.arraySize > 0;
+				layerSerialized.ApplyModifiedProperties();
+				
+				ShowStates(statesProperty, layer);
+				
+				if (stateSeparator) {
+					Separator();
+				}
 				
 				EditorGUI.indentLevel -= 1;
 			}
 			
-			currentLayerSerialized.ApplyModifiedProperties();
+			EndBox();
 		}
 
-		void ShowLayerFields() {
-			SerializedProperty iterator = currentLayerSerialized.GetIterator();
+		void ShowAddSubLayer(StateLayer parent, Rect rect) {
+			layerTypesName[0] = "Add";
+			
+			if (Selection.gameObjects.Length <= 1) {
+				rect.x = Screen.width - 72 - EditorGUI.indentLevel * 16;
+				rect.y += 1;
+				rect.width = 36 + EditorGUI.indentLevel * 16;
+				
+				EditorGUI.BeginDisabledGroup(Application.isPlaying);
+			
+				GUIStyle style = new GUIStyle("MiniToolbarPopup");
+				style.fontStyle = FontStyle.Bold;
+				style.alignment = TextAnchor.MiddleCenter;
+				
+				int layerTypeIndex = EditorGUI.Popup(rect, layerTypes.IndexOf(selectedLayerType) + 1, layerTypesName.ToArray(), style) - 1;
+				selectedLayerType = layerTypeIndex == -1 ? null : layerTypes[Mathf.Clamp(layerTypeIndex, 0, layerTypes.Count - 1)];
+			
+				if (selectedLayerType != null) {
+					StateMachineUtility.AddLayer(machine, selectedLayerType, parent);
+					selectedLayerType = null;
+				}
+			
+				EditorGUI.EndDisabledGroup();
+			}
+		}
+		
+		void ShowLayerFields(SerializedObject layerSerialized) {
+			SerializedProperty iterator = layerSerialized.GetIterator();
 			iterator.NextVisible(true);
 			iterator.NextVisible(false);
 			iterator.NextVisible(false);
 			iterator.NextVisible(false);
-			if (!iterator.NextVisible(false)) return;
+			iterator.NextVisible(false);
 			
+			if (!iterator.NextVisible(false)) {
+				return;
+			}
 			while (true) {
+				EditorGUI.BeginChangeCheck();
+				
 				EditorGUILayout.PropertyField(iterator, true);
+				
+				if (EditorGUI.EndChangeCheck()) {
+					iterator.SetValueToSelected();
+				}
 				
 				if (!iterator.NextVisible(false)) {
 					break;
@@ -272,109 +242,103 @@ namespace Magicolo.GeneralTools {
 			Separator();
 		}
 		
-		void ShowStates() {
+		void ShowStates(SerializedProperty statesProperty, StateLayer layer) {
 			for (int i = 0; i < statesProperty.arraySize; i++) {
-				currentStateProperty = statesProperty.GetArrayElementAtIndex(i);
-				currentState = currentStateProperty.GetValue<State>();
+				SerializedProperty stateProperty = statesProperty.GetArrayElementAtIndex(i);
+				State state = stateProperty.GetValue<UnityEngine.Object>() as State;
 				
-				if (currentState == null) {
-					DeleteFromArray(statesProperty, i);
-					break;
+				if (state == null) {
+					ShowLayer(statesProperty, i);
+					continue;
 				}
 				
-				BeginBox();
+				BeginBox(GetBoxStyle(state));
 				
-				Foldout(currentStateProperty, StateMachineUtility.FormatState(currentState.GetType(), currentLayer).ToGUIContent(), GetStateStyle());
+				Foldout(stateProperty, StateMachineUtility.FormatState(state.GetType(), layer).ToGUIContent(), GetStateStyle(state));
 				Reorderable(statesProperty, i, true);
 				
-				ShowState();
+				ShowState(stateProperty);
 				
 				EndBox();
 			}
 		}
 		
-		void ShowState() {
-			currentStateSerialized = new SerializedObject(currentStateProperty.objectReferenceValue);
+		void ShowState(SerializedProperty stateProperty) {
+			SerializedObject stateSerialized = new SerializedObject(stateProperty.objectReferenceValue);
 			
-			if (currentStateProperty.isExpanded) {
+			if (stateProperty.isExpanded) {
 				EditorGUI.indentLevel += 1;
 				
-				ShowStateFields();
+				ShowStateFields(stateSerialized);
 				
 				EditorGUI.indentLevel -= 1;
 			}
 			
-			currentStateSerialized.ApplyModifiedProperties();
+			stateSerialized.ApplyModifiedProperties();
 		}
 		
-		void ShowStateFields() {
-			SerializedProperty iterator = currentStateSerialized.GetIterator();
+		void ShowStateFields(SerializedObject stateSerialized) {
+			SerializedProperty iterator = stateSerialized.GetIterator();
 			iterator.NextVisible(true);
 			iterator.NextVisible(false);
 			iterator.NextVisible(false);
 				
-			while (iterator.NextVisible(false)) {
-				EditorGUILayout.PropertyField(iterator, true);
+			if (!iterator.NextVisible(false)) {
+				return;
 			}
-		}
-
-		void SetLayerStates() {
-			foreach (Type stateType in StateMachineUtility.LayerStateDict[currentLayer.GetType()]) {
-				if (statesProperty.arraySize == 0 || statesProperty.TrueForAll<State>(state => state.GetType() != stateType)) {
-					AddToArray(statesProperty);
-					State newState = currentLayer.gameObject.AddComponent(stateType) as State;
-					newState.layer = currentLayer;
-					newState.machine = stateMachine;
-					newState.hideFlags = HideFlags.HideInInspector;
-					statesProperty.GetLastArrayElement().SetValue(newState);
+			
+			while (true) {
+				EditorGUI.BeginChangeCheck();
+				
+				EditorGUILayout.PropertyField(iterator, true);
+				
+				if (EditorGUI.EndChangeCheck()) {
+					iterator.SetValueToSelected();
+				}
+				
+				if (!iterator.NextVisible(false)) {
+					break;
 				}
 			}
+			
+			Separator();
 		}
-
-		void ShowGenerateButton() {
+		
+		void ShowGenerateButton(SerializedProperty layersProperty) {
 			if (layersProperty.arraySize == 0) {
 				if (LargeButton("Generate".ToGUIContent(), true)) {
 					StateMachineGeneratorWindow.Create();
 				}
 			}
 		}
-		
-		void CleanUp() {
-			StateLayer[] layers = stateMachineObject.GetComponents<StateLayer>();
-			State[] states = stateMachineObject.GetComponents<State>();
-			StateMachineCaller[] callers = stateMachineObject.GetComponents<StateMachineCaller>();
-				
-			foreach (StateLayer layer in layers) {
-				if (layer.machine != stateMachine || layer.machine == null) {
-					layer.Remove();
-				}
-			}
-			
-			foreach (State state in states) {
-				if (state.machine != stateMachine || state.machine == null) {
-					state.Remove();
-				}
-			}
-			
-			foreach (StateMachineCaller caller in callers) {
-				if (caller.machine != stateMachine || caller.machine == null) {
-					caller.Remove();
-				}
-			}
-		}
 
-		void CleanUpLayers() {
-			for (int i = layersProperty.arraySize - 1; i >= 0; i--) {
-				if (layersProperty.GetArrayElementAtIndex(i).GetValue<StateLayer>() == null) {
-					DeleteFromArray(layersProperty, i);
+		void CleanUp() {
+			foreach (UnityEngine.Object selectedObject in targets) {
+				StateMachine selectedMachine = selectedObject as StateMachine;
+				
+				if (selectedMachine != null) {
+					StateMachineUtility.UpdateCallbacks(selectedMachine);
+					StateMachineUtility.CleanUp(selectedMachine, selectedMachine.gameObject);
 				}
 			}
 		}
 		
-		void CleanUpStates() {
-			for (int i = statesProperty.arraySize - 1; i >= 0; i--) {
-				if (statesProperty.GetArrayElementAtIndex(i).GetValue<State>() == null) {
-					DeleteFromArray(statesProperty, i);
+		void CleanUpLayers(SerializedProperty layersProperty) {
+			if (!Application.isPlaying && machine != null) {
+				for (int i = layersProperty.arraySize - 1; i >= 0; i--) {
+					if (layersProperty.GetValue<UnityEngine.Object>(i) == null) {
+						DeleteFromArray(layersProperty, i);
+					}
+				}
+			}
+		}
+		
+		void CleanUpStates(SerializedProperty statesProperty) {
+			if (!Application.isPlaying && machine != null) {
+				for (int i = statesProperty.arraySize - 1; i >= 0; i--) {
+					if (statesProperty.GetValue<UnityEngine.Object>(i) == null) {
+						DeleteFromArray(statesProperty, i);
+					}
 				}
 			}
 		}
@@ -382,11 +346,11 @@ namespace Magicolo.GeneralTools {
 		void ReorderComponents() {
 			int firstStateOrLayerIndex = 0;
 			
-			Component[] components = stateMachine.GetComponents<Component>();
+			Component[] components = machine.GetComponents<Component>();
 			for (int i = 0; i < components.Length; i++) {
 				Component component = components[i];
 				
-				if (component as State != null || component as StateLayer != null || component as StateMachineCaller != null) {
+				if (component as IState != null || component as IStateLayer != null || component as StateMachineCaller != null) {
 					firstStateOrLayerIndex = firstStateOrLayerIndex == 0 ? i : firstStateOrLayerIndex;
 				}
 				else if (firstStateOrLayerIndex > 0) {
@@ -397,13 +361,30 @@ namespace Magicolo.GeneralTools {
 			}
 		}
 		
-		GUIStyle GetStateStyle() {
+		GUIContent GetLayerLabel(StateLayer layer) {
+			string label = layer.GetType().Name;
+				
+			if (Application.isPlaying && PrefabUtility.GetPrefabType(machine) != PrefabType.Prefab) {
+				IState[] activeStates = layer.GetActiveStates();
+				string[] activeStateNames = new string[activeStates.Length];
+				
+				for (int i = 0; i < activeStateNames.Length; i++) {
+					activeStateNames[i] = activeStates[i] is IStateLayer ? activeStates[i].GetType().Name.Split('.').Last() : StateMachineUtility.FormatState(activeStates[i].GetType(), layer);
+				}
+				
+				label += " (" + activeStateNames.Concat(", ") + ")";
+			}
+			
+			return label.ToGUIContent();
+		}
+
+		GUIStyle GetLayerStyle(StateLayer layer) {
 			GUIStyle style = new GUIStyle("foldout");
 			style.fontStyle = FontStyle.Bold;
 			Color textColor = style.normal.textColor * 1.4F;
 		
-			if (Application.isPlaying) {
-				textColor = currentStatesProperty.Contains(currentState) ? new Color(0, 1, 0, 10) : new Color(1, 0, 0, 10);
+			if (Application.isPlaying && PrefabUtility.GetPrefabType(machine) != PrefabType.Prefab) {
+				textColor = layer.IsActive ? new Color(0, 1, 0, 10) : new Color(1, 0, 0, 10);
 			}
 
 			style.normal.textColor = textColor * 0.7F;
@@ -413,6 +394,35 @@ namespace Magicolo.GeneralTools {
 			style.active.textColor = textColor * 0.85F;
 			style.onActive.textColor = textColor * 0.85F;
 		
+			return style;
+		}
+
+		GUIStyle GetStateStyle(State state) {
+			GUIStyle style = new GUIStyle("foldout");
+			style.fontStyle = FontStyle.Bold;
+			Color textColor = style.normal.textColor * 1.4F;
+		
+			if (Application.isPlaying && PrefabUtility.GetPrefabType(machine) != PrefabType.Prefab) {
+				textColor = state.IsActive ? new Color(0, 1, 0, 10) : new Color(1, 0, 0, 10);
+			}
+
+			style.normal.textColor = textColor * 0.7F;
+			style.onNormal.textColor = textColor * 0.7F;
+			style.focused.textColor = textColor * 0.85F;
+			style.onFocused.textColor = textColor * 0.85F;
+			style.active.textColor = textColor * 0.85F;
+			style.onActive.textColor = textColor * 0.85F;
+		
+			return style;
+		}
+		
+		GUIStyle GetBoxStyle(IState state) {
+			GUIStyle style = new GUIStyle("box");
+			
+			if (Application.isPlaying && PrefabUtility.GetPrefabType(machine) != PrefabType.Prefab) {
+				style = state.IsActive ? CustomEditorStyles.GreenBox : CustomEditorStyles.RedBox;
+			}
+			
 			return style;
 		}
 	}

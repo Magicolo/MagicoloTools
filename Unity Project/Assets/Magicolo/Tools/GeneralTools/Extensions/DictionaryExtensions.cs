@@ -20,28 +20,37 @@ namespace Magicolo {
 			return new List<U>(dictionary.Values).GetRandom();
 		}
 	
-		public static void GetOrderedKeysValues<T, U>(this IDictionary<T, U> dictionary, out List<T> keys, out List<U> values) {
-			keys = new List<T>(dictionary.Keys);
-			values = new List<U>();
-			for (int i = 0; i < keys.Count; i++) {
-				values.Add(dictionary[keys[i]]);
-			}
-		}
-	
 		public static void GetOrderedKeysValues<T, U>(this IDictionary<T, U> dictionary, out T[] keys, out U[] values) {
-			List<T> keyList = new List<T>();
-			List<U> valueList = new List<U>();
-			dictionary.GetOrderedKeysValues(out keyList, out valueList);
-			keys = keyList.ToArray();
-			values = valueList.ToArray();
+			keys = dictionary.GetKeyArray();
+			values = new U[keys.Length];
+			
+			for (int i = 0; i < keys.Length; i++) {
+				values[i] = dictionary[keys[i]];
+			}
 		}
 		
 		public static T[] GetKeyArray<T, U>(this IDictionary<T, U> dictionary) {
-			return new List<T>(dictionary.Keys).ToArray();
+			T[] keys = new T[dictionary.Keys.Count];
+			int counter = 0;
+			
+			foreach (T key in dictionary.Keys) {
+				keys[counter] = key;
+				counter += 1;
+			}
+			
+			return keys;
 		}
 		
 		public static U[] GetValueArray<T, U>(this IDictionary<T, U> dictionary) {
-			return new List<U>(dictionary.Values).ToArray();
+			U[] values = new U[dictionary.Values.Count];
+			int counter = 0;
+			
+			foreach (U value in dictionary.Values) {
+				values[counter] = value;
+				counter += 1;
+			}
+			
+			return values;
 		}
 	}
 }

@@ -36,7 +36,7 @@ public static class Logger {
 		
 		if (toLog != null) {
 			foreach (object item in toLog) {
-				log += ObjectToString(item);
+				log += ToString(item);
 				log += ", ";
 			}
 			
@@ -59,7 +59,7 @@ public static class Logger {
 		
 		if (toLog != null) {
 			foreach (object item in toLog) {
-				log += ObjectToString(item);
+				log += ToString(item);
 				log += ", ";
 			}
 			
@@ -82,7 +82,7 @@ public static class Logger {
 		
 		if (toLog != null) {
 			foreach (object item in toLog) {
-				log += ObjectToString(item);
+				log += ToString(item);
 				log += ", ";
 			}
 			
@@ -111,14 +111,14 @@ public static class Logger {
 			Log(toLog);
 		}
 	}
-	
-	public static string ObjectToString(object obj) {
+
+	public static string ToString(object obj) {
 		string str = "";
 		
 		if (obj is System.Array) {
 			str += "(";
 			foreach (object item in (System.Array) obj) {
-				str += ObjectToString(item) + ", ";
+				str += ToString(item) + ", ";
 			}
 			
 			if (str.Length > 1) {
@@ -129,7 +129,7 @@ public static class Logger {
 		else if (obj is IList) {
 			str += "[";
 			foreach (object item in (IList) obj) {
-				str += ObjectToString(item) + ", ";
+				str += ToString(item) + ", ";
 			}
 			
 			if (str.Length > 1) {
@@ -140,7 +140,7 @@ public static class Logger {
 		else if (obj is IDictionary) {
 			str += "{";
 			foreach (object key in ((IDictionary) (IDictionary) obj).Keys) {
-				str += ObjectToString(key) + " : " + ObjectToString(((IDictionary)obj)[key]) + ", ";
+				str += ToString(key) + " : " + ToString(((IDictionary)obj)[key]) + ", ";
 			}
 			
 			if (str.Length > 1) {
@@ -149,7 +149,7 @@ public static class Logger {
 			str += "}";
 		}
 		else if (obj is IEnumerator) {
-			str += ObjectToString(((IEnumerator)obj).Current);
+			str += ToString(((IEnumerator)obj).Current);
 		}
 		else if (obj is Vector2 || obj is Vector3 || obj is Vector4 || obj is Color || obj is Quaternion || obj is Rect) {
 			str += VectorToString(obj);

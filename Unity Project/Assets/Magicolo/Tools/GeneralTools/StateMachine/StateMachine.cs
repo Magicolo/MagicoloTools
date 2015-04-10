@@ -4,8 +4,16 @@ using System.Collections;
 using Magicolo.GeneralTools;
 
 namespace Magicolo {
-	[AddComponentMenu("Magicolo/State Machine")]
-	public class StateMachine : MonoBehaviour {
+	[AddComponentMenu("Magicolo/General/State Machine")]
+	public class StateMachine : MonoBehaviourExtended, IStateMachine {
+		
+		[SerializeField]
+		bool debug = false;
+		public bool Debug {
+			get {
+				return debug;
+			}
+		}
 		
 		bool isActive;
 		public bool IsActive {
@@ -14,16 +22,32 @@ namespace Magicolo {
 			}
 		}
 		
-		[SerializeField] protected int callbacks = 1;
-		[SerializeField] protected StateLayer[] layers = new StateLayer[0];
+		[SerializeField] StateLayer[] layers = new StateLayer[0];
+		
 		Dictionary<string, IStateLayer> nameLayerDict;
+		Dictionary<string, IStateLayer> NameLayerDict {
+			get {
+				if (nameLayerDict == null) {
+					BuildLayerDict();
+				}
+				return nameLayerDict;
+			}
+		}
 		
 		void OnEnable() {
 			isActive = true;
+			
+			for (int i = 0; i < layers.Length; i++) {
+				layers[i].OnEnter();
+			}
 		}
 		
 		void OnDisable() {
 			isActive = false;
+			
+			for (int i = 0; i < layers.Length; i++) {
+				layers[i].OnExit();
+			}
 		}
 		
 		void Awake() {
@@ -142,7 +166,7 @@ namespace Magicolo {
 			IStateLayer layer = null;
 			
 			try {
-				layer = nameLayerDict[layerName];
+				layer = NameLayerDict[layerName];
 			}
 			catch {
 				Logger.LogError(string.Format("Layer named {0} was not found.", layerName));
@@ -150,20 +174,7 @@ namespace Magicolo {
 			
 			return layer;
 		}
-		
-		public IStateLayer GetLayer(int layerIndex) {
-			IStateLayer layer = null;
-			
-			try {
-				layer = layers[layerIndex];
-			}
-			catch {
-				Logger.LogError(string.Format("Layer at index {0} was not found.", layerIndex));
-			}
-			
-			return layer;
-		}
-		
+
 		public IStateLayer[] GetLayers() {
 			return layers.Clone() as IStateLayer[];
 		}
@@ -177,6 +188,10 @@ namespace Magicolo {
 					nameLayerDict[StateMachineUtility.FormatLayer(layer.GetType())] = layer;
 				}
 			}
+		}
+	
+		void Reset() {
+			StateMachineUtility.CleanUp(null, gameObject);
 		}
 	}
 }

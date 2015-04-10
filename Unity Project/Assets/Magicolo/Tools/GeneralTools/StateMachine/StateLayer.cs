@@ -6,29 +6,72 @@ using Magicolo.GeneralTools;
 namespace Magicolo {
 	public abstract class StateLayer : MonoBehaviourExtended, IStateLayer {
 		
-		public StateMachine machine;
+		public IStateLayer layer {
+			get {
+				return parentReference as IStateLayer;
+			}
+		}
 		
-		[SerializeField] State[] states = new State[0];
-		[SerializeField] List<State> currentStates = new List<State>{ null };
-		IState[] activeStates;
+		public IStateMachine machine {
+			get {
+				return machineReference;
+			}
+		}
+		
+		bool isActive;
+		public bool IsActive {
+			get {
+				return isActive;
+			}
+		}
+		
+		[SerializeField] Object parentReference = null;
+		[SerializeField] StateMachine machineReference = null;
+		[SerializeField] Object[] stateReferences = new Object[0];
+		[SerializeField] List<Object> activeStateReferences = new List<Object>{ null };
+		
+		IState[] states = new IState[0];
+		IState[] activeStates = new IState[0];
+
 		Dictionary<string, IState> nameStateDict;
+		Dictionary<string, IState> NameStateDict {
+			get {
+				if (nameStateDict == null || !Application.isPlaying) {
+					BuildStateDict();
+				}
+				
+				return nameStateDict;
+			}
+		}
 
 		public virtual void OnAwake() {
 			BuildActiveStates();
 			BuildStateDict();
 			
-			foreach (State state in states) {
-				state.OnAwake();
+			for (int i = 0; i < states.Length; i++) {
+				states[i].OnAwake();
 			}
 		}
 
 		public virtual void OnStart() {
-			for (int i = 0; i < currentStates.Count; i++) {
-				SwitchState(currentStates[i], i);
+			for (int i = 0; i < states.Length; i++) {
+				states[i].OnStart();
 			}
+		}
+
+		public virtual void OnEnter() {
+			isActive = true;
 			
 			for (int i = 0; i < activeStates.Length; i++) {
-				activeStates[i].OnStart();
+				activeStates[i].OnEnter();
+			}
+		}
+
+		public virtual void OnExit() {
+			isActive = false;
+			
+			for (int i = 0; i < activeStates.Length; i++) {
+				activeStates[i].OnExit();
 			}
 		}
 
@@ -135,6 +178,18 @@ namespace Magicolo {
 			return SwitchState(GetState(stateName), index);
 		}
 		
+		public bool StateIsActive<T>(int index = 0) where T : IState {
+			return StateIsActive(typeof(T).Name, index);
+		}
+		
+		public bool StateIsActive(System.Type stateType, int index = 0) {
+			return StateIsActive(stateType.Name, index);
+		}
+		
+		public bool StateIsActive(string stateName, int index = 0) {
+			return GetActiveState(index) == GetState(stateName);
+		}
+		
 		public T GetActiveState<T>(int index = 0) where T : IState {
 			IState activeState = GetActiveState(index);
 			return activeState is T ? (T)activeState : default(T);
@@ -170,7 +225,7 @@ namespace Magicolo {
 			IState state = null;
 			
 			try {
-				state = nameStateDict[stateName];
+				state = NameStateDict[stateName];
 			}
 			catch {
 				Logger.LogError(string.Format("State named {0} was not found.", stateName));
@@ -178,18 +233,9 @@ namespace Magicolo {
 			
 			return state;
 		}
-		
-		public IState GetState(int stateIndex) {
-			IState state = null;
-			
-			try {
-				state = states[stateIndex];
-			}
-			catch {
-				Logger.LogError(string.Format("State at index {0} was not found.", stateIndex));
-			}
-			
-			return state;
+
+		public IState[] GetStates() {
+			return NameStateDict.GetValueArray();
 		}
 		
 		public T GetLayer<T>() where T : IStateLayer {
@@ -203,39 +249,46 @@ namespace Magicolo {
 		public IStateLayer GetLayer(string layerName) {
 			return machine.GetLayer(layerName);
 		}
-		
-		public IStateLayer GetLayer(int layerIndex) {
-			return machine.GetLayer(layerIndex);
-		}
-		
+
 		IState SwitchState(IState state, int index = 0) {
 			state = state ?? EmptyState.Instance;
 			
-			GetActiveState(index).OnExit();
+			if (IsActive) {
+				GetActiveState(index).OnExit();
+			}
+			
 			activeStates[index] = state;
-			currentStates[index] = state as State == null ? null : (State)state;
-			state.OnEnter();
+			activeStateReferences[index] = state as Object;
+			
+			if (IsActive) {
+				state.OnEnter();
+			}
 		
 			return state;
 		}
 
 		void BuildActiveStates() {
-			activeStates = new IState[currentStates.Count];
+			activeStates = new IState[activeStateReferences.Count];
 			
 			for (int i = 0; i < activeStates.Length; i++) {
-				activeStates[i] = EmptyState.Instance;
+				activeStates[i] = activeStateReferences[i] as IState ?? EmptyState.Instance;
 			}
 		}
 		
 		void BuildStateDict() {
 			nameStateDict = new Dictionary<string, IState>();
+			states = new IState[stateReferences.Length];
 			
 			nameStateDict[EmptyState.Instance.GetType().Name] = EmptyState.Instance;
+			nameStateDict[StateMachineUtility.FormatState(EmptyState.Instance.GetType(), "")] = EmptyState.Instance;
 			
-			foreach (State state in states) {
+			for (int i = 0; i < stateReferences.Length; i++) {
+				IState state = (IState)stateReferences[i];
+				
 				if (state != null) {
 					nameStateDict[state.GetType().Name] = state;
-					nameStateDict[StateMachineUtility.FormatState(state.GetType(), state.layer.GetType())] = state;
+					nameStateDict[state is StateLayer ? state.GetType().Name : StateMachineUtility.FormatState(state.GetType(), state.layer.GetType())] = state;
+					states[i] = state;
 				}
 			}
 		}

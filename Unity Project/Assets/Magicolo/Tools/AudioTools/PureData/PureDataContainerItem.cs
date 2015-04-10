@@ -123,7 +123,7 @@ public class PureDataContainerItem : PureDataSourceOrContainerItem {
 	}
 		
 	public override string ToString() {
-		return string.Format("{0}({1}, {2}, {3})", typeof(PureDataContainerItem).Name, Name, State, Logger.ObjectToString(items));
+		return string.Format("{0}({1}, {2}, {3})", typeof(PureDataContainerItem).Name, Name, State, Logger.ToString(items));
 	}
 	
 	protected virtual void ExecuteOnItems(Action<PureDataSourceOrContainerItem> action) {

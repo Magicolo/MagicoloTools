@@ -138,9 +138,11 @@ namespace Magicolo {
 	
 		public static object InvokeMethod(this object obj, string methodName, params object[] arguments) {
 			MethodInfo method = obj.GetType().GetMethod(methodName, AllFlags);
+			
 			if (method != null) {
 				return method.Invoke(obj, arguments);
 			}
+			
 			return null;
 		}
 	
